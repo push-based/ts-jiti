@@ -7,7 +7,7 @@ import {
   teardownTestFolder,
 } from '@push-based/test-utils';
 import { executeProcess } from '@push-based/ts-jiti';
-import { cp, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { cp } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { beforeAll, expect } from 'vitest';
@@ -17,7 +17,6 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 describe('CLI jiti', () => {
   const envRoot = path.join(E2E_ENVIRONMENTS_DIR, nxTargetProject());
   const testFileDir = path.join(envRoot, TEST_OUTPUT_DIR, 'jiti');
-  const schemaFile = path.join(testFileDir, 'src', 'schema.ts');
 
   beforeAll(async () => {
     await cp(

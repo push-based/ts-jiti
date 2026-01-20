@@ -7,9 +7,8 @@ import {
   teardownTestFolder,
 } from '@push-based/test-utils';
 import { executeProcess, tsconfig } from '@push-based/ts-jiti';
-import { cp, readFile } from 'node:fs/promises';
+import { cp } from 'node:fs/promises';
 import path from 'node:path';
-import * as process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { beforeAll, expect } from 'vitest';
 

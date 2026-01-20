@@ -1,10 +1,6 @@
+import { osAgnosticPath } from '@push-based/test-utils';
 import type { SyncExpectationResult } from '@vitest/expect';
 import { expect } from 'vitest';
-
-// Simple OS-agnostic path normalization
-function osAgnosticPath(path: string): string {
-  return path.replace(/\\/g, '/');
-}
 
 export type CustomPathMatchers = {
   toMatchPath: (path: string) => void;

@@ -2,7 +2,6 @@ import type { JitiOptions } from 'jiti';
 import { formatCommandStatus } from '../utils/command.js';
 import { executeProcess } from '../utils/execute-process.js';
 import { logger } from '../utils/logger.js';
-import { objectToCliArgs } from '../utils/transform.js';
 
 /**
  * Small wrapper to run jiti command line with options derived from tsconfig.
@@ -15,26 +14,25 @@ export async function jitiCommand(
   jitiOptionsFromTsConfig: JitiOptions,
   argv = process.argv.slice(2),
 ): Promise<void> {
-  // Convert jiti options to environment variables that jiti recognizes
-  const env = { ...process.env };
-
-  if (jitiOptionsFromTsConfig.alias) {
-    env['JITI_ALIAS'] = JSON.stringify(jitiOptionsFromTsConfig.alias);
-  }
-
-  if (jitiOptionsFromTsConfig.interopDefault !== undefined) {
-    env['JITI_INTEROP_DEFAULT'] = jitiOptionsFromTsConfig.interopDefault
-      ? '1'
-      : '0';
-  }
-
-  if (jitiOptionsFromTsConfig.sourceMaps !== undefined) {
-    env['JITI_SOURCE_MAPS'] = jitiOptionsFromTsConfig.sourceMaps ? '1' : '0';
-  }
-
-  if (jitiOptionsFromTsConfig.jsx !== undefined) {
-    env['JITI_JSX'] = jitiOptionsFromTsConfig.jsx ? '1' : '0';
-  }
+  const env = {
+    ...process.env,
+    ...(jitiOptionsFromTsConfig.alias
+      ? { JITI_ALIAS: JSON.stringify(jitiOptionsFromTsConfig.alias) }
+      : {}),
+    ...(jitiOptionsFromTsConfig.interopDefault
+      ? {
+          JITI_INTEROP_DEFAULT: jitiOptionsFromTsConfig.interopDefault
+            ? '1'
+            : '0',
+        }
+      : {}),
+    ...(jitiOptionsFromTsConfig.sourceMaps
+      ? { JITI_SOURCE_MAPS: jitiOptionsFromTsConfig.sourceMaps ? '1' : '0' }
+      : {}),
+    ...(jitiOptionsFromTsConfig.jsx
+      ? { JITI_JSX: jitiOptionsFromTsConfig.jsx ? '1' : '0' }
+      : {}),
+  };
 
   const commandString = `npx jiti ${argv.join(' ')}`;
   logger.debug(

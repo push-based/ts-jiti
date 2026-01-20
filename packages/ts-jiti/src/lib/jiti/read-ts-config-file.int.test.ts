@@ -1,30 +1,50 @@
-import { osAgnosticPath } from '@push-based/test-utils';
-import { mkdir, rm, writeFile } from 'node:fs/promises';
+import { fromJson } from '@push-based/test-utils';
+import { rm } from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import * as tsModule from 'typescript';
 import { describe, expect, it } from 'vitest';
 import { loadTargetConfig, readTscByPath } from './read-ts-config-file.js';
 
+const TEST_OUTPUT_BASE = 'packages/ts-jiti/tmp';
+
 describe('loadTargetConfig', () => {
+  const testDir = path.join(TEST_OUTPUT_BASE, 'load-target-config');
+
+  afterAll(async () => {
+    await rm(testDir, { recursive: true, force: true });
+  });
+
   const readConfigFileSpy = vi.spyOn(tsModule, 'readConfigFile');
   const parseJsonConfigFileContentSpy = vi.spyOn(
     tsModule,
     'parseJsonConfigFileContent',
   );
 
-  it.skip('should return the parsed content of a tsconfig file and ist TypeScript helper to parse it', () => {
-    // From packages/ts-jiti/src/lib/jiti/ go up to packages/ts-jiti/ then to mocks/fixtures/basic-setup/
-    const fixturePath = path.join(
-      path.dirname(path.dirname(path.dirname(path.dirname(fileURLToPath(import.meta.url))))),
-      'mocks',
-      'fixtures',
-      'basic-setup',
-      'tsconfig.init.json'
+  it('should return the parsed content of a tsconfig file and ist TypeScript helper to parse it', async () => {
+    const cleanup = await fromJson(
+      {
+        'tsconfig.init.json': {
+          compilerOptions: {
+            module: 'commonjs',
+            target: 'es2016',
+            esModuleInterop: true,
+            forceConsistentCasingInFileNames: true,
+            skipLibCheck: true,
+            strict: true,
+          },
+          include: ['**/*.ts', '**/*.js'],
+        },
+        'src/index.ts': 'export const dummy = 42;',
+      },
+      'should-return-parsed-content',
     );
-    expect(
-      loadTargetConfig(fixturePath),
-    ).toStrictEqual(
+    const configPath = path.join(
+      'should-return-parsed-content',
+      'tsconfig.init.json',
+    );
+
+    const result = loadTargetConfig(configPath);
+    expect(result).toStrictEqual(
       expect.objectContaining({
         fileNames: expect.any(Array),
         options: {
@@ -44,81 +64,105 @@ describe('loadTargetConfig', () => {
       expect.any(Function),
     );
     expect(parseJsonConfigFileContentSpy).toHaveBeenCalledTimes(1);
+    await cleanup();
   });
 
-  it.skip('should return the parsed content of a tsconfig file that extends another config', () => {
-    // From packages/ts-jiti/src/lib/jiti/ go up to packages/ts-jiti/ then to mocks/fixtures/basic-setup/
-    const fixturePath = path.join(
-      path.dirname(path.dirname(path.dirname(path.dirname(fileURLToPath(import.meta.url))))),
-      'mocks',
-      'fixtures',
-      'basic-setup',
-      'tsconfig.extends-extending.json'
+  it('should return the parsed content of a tsconfig file that extends another config', async () => {
+    const cleanup = await fromJson(
+      {
+        'tsconfig.extends-base.json': {
+          compilerOptions: {
+            rootDir: './',
+            verbatimModuleSyntax: false,
+          },
+          include: ['src/**/*', 'src/0-no-diagnostics/**/*'],
+        },
+        'tsconfig.extends-extending.json': {
+          extends: './tsconfig.extends-base.json',
+          compilerOptions: {
+            module: 'commonjs',
+            verbatimModuleSyntax: true,
+          },
+          exclude: ['src/some-other-dir'],
+        },
+        'src/index.ts': 'export const dummy = 42;',
+        'src/0-no-diagnostics/test.ts': 'export const noDiagnostics = 1;',
+      },
+      'should-return-parsed-content-extends',
     );
-    expect(
-      loadTargetConfig(fixturePath),
-    ).toStrictEqual(
+    const configPath = path.join(
+      'should-return-parsed-content-extends',
+      'tsconfig.extends-extending.json',
+    );
+
+    const result = loadTargetConfig(configPath);
+    expect(result).toStrictEqual(
       expect.objectContaining({
         fileNames: expect.arrayContaining([
-          // from tsconfig.extends-base.json#includes and tsconfig.extends-extending.json#excludes
           expect.stringMatching(/src[/\\]0-no-diagnostics[/\\]/),
         ]),
         options: expect.objectContaining({
-          // Options from tsconfig.extends-base.json
-          rootDir: expect.stringMatching(/basic-setup$/),
-          // Options from tsconfig.extends-extending.json
+          rootDir: expect.stringMatching(
+            /should-return-parsed-content-extends$/,
+          ),
           module: 1,
           configFilePath: expect.stringContaining(
             'tsconfig.extends-extending.json',
           ),
-          verbatimModuleSyntax: true, // Overrides base config's false
+          verbatimModuleSyntax: true,
         }),
       }),
     );
 
     expect(readConfigFileSpy).toHaveBeenCalledTimes(1);
     expect(parseJsonConfigFileContentSpy).toHaveBeenCalledTimes(1);
+    await cleanup();
   });
 });
 
 describe('readTscByPath', () => {
+  const testDir = path.join(TEST_OUTPUT_BASE, 'read-tsc-by-path');
+
+  afterAll(async () => {
+    await rm(testDir, { recursive: true, force: true });
+  });
+
   it('should load a valid tsconfig.json file', async () => {
-    const tempDir = path.join(
-      'packages/ts-jiti/tmp',
+    const cleanup = await fromJson(
+      {
+        'tsconfig.json': {
+          compilerOptions: {
+            paths: {
+              '@app/*': ['src/*'],
+              '@lib/*': ['lib/*'],
+            },
+            esModuleInterop: true,
+            sourceMap: true,
+            jsx: 'react',
+          },
+          include: ['**/*.ts'],
+        },
+        'dummy.ts': 'export const dummy = 42;',
+      },
       'should-load-a-valid-tsconfig-json-file',
     );
-    await mkdir(tempDir, { recursive: true });
-    try {
-      const tsconfigPath = path.join(tempDir, 'tsconfig.json');
-      const tsconfigContent = {
-        compilerOptions: {
-          paths: {
-            '@app/*': ['src/*'],
-            '@lib/*': ['lib/*'],
-          },
-        },
-        include: ['**/*.ts'],
-      };
-      await writeFile(tsconfigPath, JSON.stringify(tsconfigContent));
+    const configPath = path.join(
+      'should-load-a-valid-tsconfig-json-file',
+      'tsconfig.json',
+    );
 
-      // Create a dummy TypeScript file so TypeScript can find it
-      await writeFile(
-        path.join(tempDir, 'dummy.ts'),
-        'export const dummy = 42;',
-      );
-
-      const result = await readTscByPath(tsconfigPath);
-      expect(result).toEqual(
-        expect.objectContaining({
-          paths: {
-            '@app/*': ['src/*'],
-            '@lib/*': ['lib/*'],
-          },
-        }),
-      );
-    } finally {
-      await rm(tempDir, { recursive: true, force: true });
-    }
+    await expect(readTscByPath(configPath)).resolves.toStrictEqual({
+      configFilePath: expect.any(String),
+      paths: {
+        '@app/*': ['src/*'],
+        '@lib/*': ['lib/*'],
+      },
+      pathsBasePath: expect.any(String),
+      esModuleInterop: true,
+      sourceMap: true,
+      jsx: 2, // React JSX
+    });
+    await cleanup();
   });
 
   it('should throw if the path is empty', async () => {
@@ -129,77 +173,5 @@ describe('readTscByPath', () => {
     await expect(
       readTscByPath(path.join('non-existent', 'tsconfig.json')),
     ).rejects.toThrow(/Tsconfig file not found/);
-  });
-
-  it('should load tsconfig with different basename', async () => {
-    const tempDir = path.join(
-      'packages/ts-jiti/tmp',
-      'should-load-tsconfig-with-different-basename',
-    );
-    await mkdir(tempDir, { recursive: true });
-    try {
-      const configPath = path.join(tempDir, 'tsconfig.build.json');
-      const tsconfigContent = {
-        compilerOptions: {
-          paths: {
-            '@build/*': ['build/*'],
-          },
-        },
-        include: ['**/*.ts'],
-      };
-      await writeFile(configPath, JSON.stringify(tsconfigContent));
-
-      // Create a dummy TypeScript file so TypeScript can find it
-      await writeFile(
-        path.join(tempDir, 'dummy.ts'),
-        'export const dummy = 42;',
-      );
-
-      const result = await readTscByPath(configPath);
-      expect(result).toEqual(
-        expect.objectContaining({
-          paths: {
-            '@build/*': ['build/*'],
-          },
-        }),
-      );
-    } finally {
-      await rm(tempDir, { recursive: true, force: true });
-    }
-  });
-
-  it('should handle tsconfig without paths', async () => {
-    const tempDir = path.join(
-      'packages/ts-jiti/tmp',
-      'should-handle-tsconfig-without-paths',
-    );
-    await mkdir(tempDir, { recursive: true });
-    try {
-      const tsconfigPath = path.join(tempDir, 'tsconfig.json');
-      const tsconfigContent = {
-        compilerOptions: {
-          target: 'ES2020',
-          module: 'commonjs',
-        },
-        include: ['**/*.ts'],
-      };
-      await writeFile(tsconfigPath, JSON.stringify(tsconfigContent));
-
-      // Create a dummy TypeScript file so TypeScript can find it
-      await writeFile(
-        path.join(tempDir, 'dummy.ts'),
-        'export const dummy = 42;',
-      );
-
-      const result = await readTscByPath(tsconfigPath);
-      expect(result).toEqual(
-        expect.objectContaining({
-          target: 7, // ES2020
-          module: 1, // commonjs
-        }),
-      );
-    } finally {
-      await rm(tempDir, { recursive: true, force: true });
-    }
   });
 });

@@ -1,6 +1,6 @@
 import type { JitiOptions } from 'jiti';
 import path from 'node:path';
-import type { CompilerOptions, JsxEmit } from 'typescript';
+import type { CompilerOptions } from 'typescript';
 
 /**
  * Converts TypeScript paths configuration to jiti alias format
@@ -12,35 +12,40 @@ export function mapTsPathsToJitiAlias(
   paths: Record<string, string[]>,
   baseUrl: string,
 ): Record<string, string> {
-  return Object.fromEntries(
-    Object.entries(paths)
-      .filter(
-        ([, pathMappings]) =>
-          Array.isArray(pathMappings) && pathMappings.length > 0,
-      )
-      .map(([pathPattern, pathMappings]) => {
-        // Remove the /* from the end if present
-        const aliasKey = pathPattern.replace(/\/\*$/, '');
-        const aliasValue = pathMappings[0]!.replace(/\/\*$/, ''); // We know this exists due to filter
-
-        // Resolve relative paths to absolute paths
-        const resolvedAliasValue = path.isAbsolute(aliasValue)
+  return Object.entries(paths).reduce(
+    (aliases, [pathPattern, pathMappings]) => {
+      if (!Array.isArray(pathMappings) || pathMappings.length === 0) {
+        return aliases;
+      }
+      const aliasKey = pathPattern.replace(/\/\*$/, '');
+      const aliasValue = (pathMappings.at(0) as string).replace(/\/\*$/, '');
+      return {
+        ...aliases,
+        [aliasKey]: path.isAbsolute(aliasValue)
           ? aliasValue
-          : path.resolve(baseUrl, aliasValue);
-
-        return [aliasKey, resolvedAliasValue];
-      }),
+          : path.resolve(baseUrl, aliasValue),
+      };
+    },
+    {} satisfies Record<string, string>,
   );
 }
 
 /**
+ * Maps TypeScript JSX emit mode to Jiti JSX boolean option
+ * @param tsJsxMode TypeScript JsxEmit enum value (0-5)
+ * @returns true if JSX processing should be enabled, false otherwise
+ */
+export const mapTsJsxToJitiJsx = (tsJsxMode: number): boolean =>
+  tsJsxMode !== 0;
+
+/**
  * Possible TS to jiti options mapping
- * | Jiti Option       | TypeScript Option         | Description |
- * |-------------------|---------------------------|-------------|
- * | alias             | paths                    | Module path aliases for module resolution. |
- * | interopDefault    | esModuleInterop         | Enable default import interop. |
- * | sourceMaps        | sourceMap               | Enable sourcemap generation. |
- * | jsx               | jsx                     | JSX emit mode and settings. |
+ * | Jiti Option       | Jiti Type               | TS Option              | TS Type                  | Description |
+ * |-------------------|-------------------------|-----------------------|--------------------------|-------------|
+ * | alias             | Record<string, string> | paths                 | Record<string, string[]> | Module path aliases for module resolution. |
+ * | interopDefault    | boolean                 | esModuleInterop       | boolean                  | Enable default import interop. |
+ * | sourceMaps        | boolean                 | sourceMap             | boolean                  | Enable sourcemap generation. |
+ * | jsx               | boolean                 | jsx                   | JsxEmit (0-5)           | TS JsxEmit enum (0-5) => boolean JSX processing. |
  */
 export type MappableJitiOptions = Partial<
   Pick<JitiOptions, 'alias' | 'interopDefault' | 'sourceMaps' | 'jsx'>
@@ -71,10 +76,8 @@ export function parseTsConfigToJitiConfig(
     ...(compilerOptions.sourceMap == null
       ? {}
       : { sourceMaps: compilerOptions.sourceMap }),
-    ...(compilerOptions.jsx != null &&
-      compilerOptions.jsx !== 0 &&
-      compilerOptions.jsx !== 'none'
-      ? { jsx: true }
-      : {}),
+    ...(compilerOptions.jsx == null
+      ? {}
+      : { jsx: mapTsJsxToJitiJsx(compilerOptions.jsx) }),
   };
 }

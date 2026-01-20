@@ -1,7 +1,6 @@
 import type { CompilerOptions } from 'typescript';
 import { describe, expect, vi } from 'vitest';
 import { parseTsConfigToJitiConfig } from '../jiti/jiti.schema.js';
-import { logger } from '../utils/logger.js';
 import { autoloadTsc, readTscByPath } from './read-ts-config-file.js';
 
 // Mock dependencies
@@ -76,7 +75,10 @@ describe('readTscByPath', () => {
     const result = await readTscByPath('/path/to/tsconfig.json');
 
     expect(result).toStrictEqual(mockConfig.compilerOptions);
-    expect(readConfigFile).toHaveBeenCalledWith('/path/to/tsconfig.json', expect.any(Function));
+    expect(readConfigFile).toHaveBeenCalledWith(
+      '/path/to/tsconfig.json',
+      expect.any(Function),
+    );
   });
 
   it('throws error when config file has errors', async () => {

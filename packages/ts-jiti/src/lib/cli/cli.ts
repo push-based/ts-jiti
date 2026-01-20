@@ -22,7 +22,7 @@ export async function runCli(): Promise<void> {
     return;
   }
 
-  // Load tsconfig if provided and parse it for jiti options
+  // eslint-disable-next-line functional/no-let
   let jitiOptions = {} satisfies JitiOptions;
   if (tsconfigPath) {
     try {
