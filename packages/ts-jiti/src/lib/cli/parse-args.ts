@@ -19,6 +19,10 @@ export const cliArgsSchema = z
       describe:
         'Output path for print-config command (if not provided, prints to stdout)',
     }),
+    // positional args for jiti command
+    positionalArgs: z.array(z.string()).optional().meta({
+      describe: 'Additional positional arguments passed to the jiti command',
+    }),
   })
   .meta({
     describe:
@@ -55,14 +59,14 @@ export function parseCliArgs(argv = process.argv.slice(2)): CliArgs {
 
 export function parsePositionals(positionals: string[], isHelp: boolean) {
   try {
-    const [command, schema, outPath] =
+    const [command, ...rest] =
       isHelp || commandSchema.safeParse(positionals.at(0)).success
         ? positionals
-        : ['convert', ...positionals];
+        : ['jiti', ...positionals];
     return {
       command,
-      ...(schema ? { schema } : {}),
-      ...(outPath ? { outPath } : {}),
+      // For jiti command, rest args are passed to jiti
+      ...(rest.length > 0 ? { positionalArgs: rest } : {}),
     };
   } catch (error) {
     throw new Error(

@@ -1,5 +1,7 @@
+import { removeColorCodes } from '@push-based/test-utils';
 import { ChildProcess } from 'node:child_process';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it, vi } from 'vitest';
 import { type ProcessObserver, executeProcess } from './execute-process.js';
 
@@ -17,6 +19,7 @@ function getAsyncProcessRunnerConfig(
     command: 'node',
     args: [
       path.join(
+        path.dirname(path.dirname(path.dirname(path.dirname(path.dirname(path.dirname(fileURLToPath(import.meta.url))))))),
         'testing',
         'test-utils',
         'src',
@@ -51,7 +54,9 @@ describe('executeProcess', () => {
     expect(spyObserver.onStdout).toHaveBeenCalled();
     expect(spyObserver.onComplete).toHaveBeenCalledOnce();
     expect(spyObserver.onError).not.toHaveBeenCalled();
-    expect(processResult.stdout).toMatch(/v\d{1,2}(\.\d{1,2}){0,2}/);
+    expect(removeColorCodes(processResult.stdout)).toMatch(
+      /v\d{1,2}(\.\d{1,2}){0,2}/,
+    );
   });
 
   it('should work with npx command `npx --help`', async () => {
@@ -63,7 +68,7 @@ describe('executeProcess', () => {
     expect(spyObserver.onStdout).toHaveBeenCalledOnce();
     expect(spyObserver.onComplete).toHaveBeenCalledOnce();
     expect(spyObserver.onError).not.toHaveBeenCalled();
-    expect(processResult.stdout).toContain('npm exec');
+    expect(removeColorCodes(processResult.stdout)).toContain('npm exec');
   });
 
   it('should work with script `node custom-script.js`', async () => {
@@ -73,7 +78,9 @@ describe('executeProcess', () => {
     }).catch(errorSpy);
 
     expect(errorSpy).not.toHaveBeenCalled();
-    expect(processResult.stdout).toContain('process:complete');
+    expect(removeColorCodes(processResult.stdout)).toContain(
+      'process:complete',
+    );
     expect(spyObserver.onStdout).toHaveBeenCalledTimes(6); // intro + 4 runs + complete
     expect(spyObserver.onError).not.toHaveBeenCalled();
     expect(spyObserver.onComplete).toHaveBeenCalledOnce();
@@ -93,7 +100,7 @@ describe('executeProcess', () => {
     expect(processResult).toBeUndefined();
     expect(spyObserver.onStdout).toHaveBeenCalledTimes(2); // intro + 1 run before error
     expect(spyObserver.onStdout).toHaveBeenLastCalledWith(
-      'process:update\n',
+      removeColorCodes('process:update\n'),
       expect.any(ChildProcess),
     );
     expect(spyObserver.onStderr).toHaveBeenCalled();
@@ -119,7 +126,7 @@ describe('executeProcess', () => {
     expect(errorSpy).not.toHaveBeenCalled();
     expect(processResult.code).toBe(1);
     expect(processResult.stdout).toContain('process:update');
-    expect(processResult.stderr).toContain('dummy-error');
+    expect(removeColorCodes(processResult.stderr)).toContain('dummy-error');
     expect(spyObserver.onStdout).toHaveBeenCalledTimes(2); // intro + 1 run before error
     expect(spyObserver.onStderr).toHaveBeenCalled();
     expect(spyObserver.onError).not.toHaveBeenCalled();
@@ -129,7 +136,7 @@ describe('executeProcess', () => {
   it('should execute simple commands successfully', async () => {
     const result = await executeProcess({ command: 'echo', args: ['hello'] });
     expect(result.code).toBe(0);
-    expect(result.stdout).toContain('hello');
+    expect(removeColorCodes(result.stdout)).toContain('hello');
   });
 
   it('should handle process errors', async () => {

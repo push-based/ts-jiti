@@ -1,12 +1,11 @@
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { importModule } from './jiti.js';
 
 describe('importModule', () => {
   const mockDir = path.join(
-    process.cwd(),
-    'packages',
-    'ts-jiti',
+    path.dirname(path.dirname(path.dirname(path.dirname(fileURLToPath(import.meta.url))))),
     'mocks',
     'fixtures',
   );
@@ -14,14 +13,14 @@ describe('importModule', () => {
   it('should load a valid ES module', async () => {
     await expect(
       importModule({
-        filepath: path.join(mockDir, 'extensions', 'basic.zod-schema.mjs'),
+        filepath: path.join(mockDir, 'extensions', 'user.schema.mjs'),
       }),
     ).resolves.toEqual(expect.objectContaining({ _def: expect.any(Object) }));
   });
 
   it('should load a valid CommonJS module', async () => {
     const result = await importModule({
-      filepath: path.join(mockDir, 'extensions', 'basic.zod-schema.cjs'),
+      filepath: path.join(mockDir, 'extensions', 'user.schema.cjs'),
     });
     // CommonJS modules may be wrapped - check it's a valid zod schema or function
     expect(result).toBeDefined();
@@ -33,7 +32,7 @@ describe('importModule', () => {
   it('should load an ES module with default export', async () => {
     await expect(
       importModule({
-        filepath: path.join(mockDir, 'extensions', 'basic.zod-schema.js'),
+        filepath: path.join(mockDir, 'extensions', 'user.schema.js'),
       }),
     ).resolves.toEqual(expect.objectContaining({ _def: expect.any(Object) }));
   });
@@ -41,7 +40,7 @@ describe('importModule', () => {
   it('should load a valid TS module with a default export', async () => {
     await expect(
       importModule({
-        filepath: path.join(mockDir, 'extensions', 'basic.zod-schema.ts'),
+        filepath: path.join(mockDir, 'extensions', 'user.schema.ts'),
       }),
     ).resolves.toEqual(expect.objectContaining({ _def: expect.any(Object) }));
   });
@@ -54,7 +53,7 @@ describe('importModule', () => {
 
   it('should throw if path is a directory', async () => {
     await expect(importModule({ filepath: mockDir })).rejects.toThrow(
-      `Expected '${mockDir}' to be a file`,
+      `File '${mockDir}' does not exist`,
     );
   });
 });

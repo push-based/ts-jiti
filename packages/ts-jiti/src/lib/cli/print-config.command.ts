@@ -1,7 +1,7 @@
+import type { JitiOptions } from 'jiti';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { logger } from '../utils/logger.js';
-import type { JitiOptions } from './read-ts-config-file.js';
 
 export function isPrintConfigCommand(args: string[]): boolean {
   return args[0] === 'print-config';

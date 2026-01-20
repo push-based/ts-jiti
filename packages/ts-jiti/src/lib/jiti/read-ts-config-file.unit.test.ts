@@ -1,3 +1,4 @@
+import { removeColorCodes } from '@push-based/test-utils';
 import { describe, expect, vi } from 'vitest';
 import {
   autoloadTsc,
@@ -5,7 +6,6 @@ import {
   readTscByPath,
 } from './read-ts-config-file.js';
 
-// Mock fileExists
 vi.mock('../utils/file-system.js', async importOriginal => {
   const original = await importOriginal();
   return {
@@ -13,14 +13,6 @@ vi.mock('../utils/file-system.js', async importOriginal => {
     fileExists: vi.fn(),
   };
 });
-
-// Mock logger
-vi.mock('../utils/logger.js', () => ({
-  logger: {
-    debug: vi.fn(),
-    warn: vi.fn(),
-  },
-}));
 
 // Mock TypeScript functions
 vi.mock('typescript', async () => {
@@ -35,7 +27,21 @@ vi.mock('typescript', async () => {
   };
 });
 
-// Mock path functions
+vi.mock('../utils/logger.js', () => ({
+  logger: {
+    debug: vi.fn(),
+    warn: vi.fn(),
+  },
+}));
+
+vi.mock('node:process', async () => {
+  const actual = await vi.importActual('node:process');
+  return {
+    ...actual,
+    cwd: vi.fn(() => '/test'),
+  };
+});
+
 vi.mock('node:path', async () => {
   const actual = await vi.importActual('node:path');
   return {
@@ -43,15 +49,6 @@ vi.mock('node:path', async () => {
     resolve: vi.fn((...args) => args.at(-1)), // Return the last argument
     dirname: vi.fn(() => '/mock/dir'),
     join: vi.fn((...args) => args.join('/')),
-  };
-});
-
-// Mock process.cwd
-vi.mock('node:process', async () => {
-  const actual = await vi.importActual('node:process');
-  return {
-    ...actual,
-    cwd: vi.fn(() => '/test'),
   };
 });
 
@@ -120,8 +117,8 @@ describe('readTscByPath', () => {
   let parseJsonConfigFileContent: any;
 
   beforeAll(async () => {
-    const fsModule = await import('../utils/file-system.js');
-    fileExists = fsModule.fileExists;
+    const fsUtilsModule = await import('../utils/file-system.js');
+    fileExists = vi.spyOn(fsUtilsModule, 'fileExists');
 
     const tsModule = await import('typescript');
     readConfigFile = tsModule.readConfigFile;
@@ -155,6 +152,22 @@ describe('readTscByPath', () => {
     const result = await readTscByPath('tsconfig.json');
     expect(result).toEqual({ esModuleInterop: true });
   });
+
+  it('call loadTargetConfig to parse config file', async () => {
+    fileExists.mockResolvedValueOnce(true);
+    readConfigFile.mockReturnValueOnce({
+      config: { compilerOptions: { paths: { '@/*': ['./src/*'] } } },
+      error: undefined,
+    });
+    parseJsonConfigFileContent.mockReturnValueOnce({
+      options: { paths: { '@/*': ['./src/*'] } },
+      fileNames: ['src/index.ts'],
+    });
+
+    await expect(
+      readTscByPath('/path/to/tsconfig.json'),
+    ).resolves.not.toThrow();
+  });
 });
 
 describe('autoloadTsc', () => {
@@ -164,11 +177,11 @@ describe('autoloadTsc', () => {
   let parseJsonConfigFileContent: any;
 
   beforeAll(async () => {
-    const fsModule = await import('../utils/file-system.js');
-    fileExists = fsModule.fileExists;
+    const fsUtilsModule = await import('../utils/file-system.js');
+    fileExists = vi.spyOn(fsUtilsModule, 'fileExists');
 
     const loggerModule = await import('../utils/logger.js');
-    logger = loggerModule.logger;
+    logger = vi.mocked(loggerModule.logger);
 
     const tsModule = await import('typescript');
     readConfigFile = tsModule.readConfigFile;
@@ -227,16 +240,16 @@ describe('autoloadTsc', () => {
     fileExists.mockResolvedValueOnce(true); // First call for autoloadTsc check
     fileExists.mockResolvedValueOnce(true); // Second call for readTscByPath check
     readConfigFile.mockReturnValueOnce({
-      config: { compilerOptions: { jsx: 2 } },
+      config: { compilerOptions: { jsx: 'react' } },
       error: undefined,
     });
     parseJsonConfigFileContent.mockReturnValueOnce({
-      options: { jsx: 2 },
+      options: { jsx: 'react' },
       fileNames: ['src/index.ts'],
     });
 
     const result = await autoloadTsc('custom');
-    expect(result).toEqual({ jsx: 2 });
+    expect(result).toEqual({ jsx: 'react' });
     expect(fileExists).toHaveBeenCalledWith('tsconfig.custom.json');
     expect(fileExists).toHaveBeenCalledWith('/test/tsconfig.custom.json');
   });
@@ -264,14 +277,18 @@ describe('autoloadTsc', () => {
     fileExists.mockResolvedValueOnce(true); // Second call for readTscByPath check
     readConfigFile.mockReturnValueOnce({
       config: { compilerOptions: { paths: {} } },
-      error: undefined
+      error: undefined,
     });
     parseJsonConfigFileContent.mockReturnValueOnce({
       options: { paths: {} },
-      fileNames: ['src/index.ts']
+      fileNames: ['src/index.ts'],
     });
 
     await autoloadTsc();
-    expect(logger.debug).toHaveBeenCalledWith('Found default ts config file tsconfig.json');
+    const debugCalls = logger.debug.mock.calls;
+    expect(debugCalls).toHaveLength(2);
+    expect(removeColorCodes(debugCalls[1][0])).toBe(
+      'Found default ts config file tsconfig.json',
+    );
   });
 });

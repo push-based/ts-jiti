@@ -2,32 +2,29 @@ import { nxTargetProject } from '@push-based/test-nx-utils';
 import {
   E2E_ENVIRONMENTS_DIR,
   TEST_OUTPUT_DIR,
+  removeColorCodes,
   restoreNxIgnoredFiles,
   teardownTestFolder,
 } from '@push-based/test-utils';
-import { executeProcess, tsconfig } from '@push-based/ts-jiti';
-import { cp, readFile } from 'node:fs/promises';
+import { executeProcess } from '@push-based/ts-jiti';
+import { cp, mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { beforeAll, expect } from 'vitest';
 
-describe('CLI convert', () => {
-  const fixtureDummyDir = path.join(
-    'e2e',
-    nxTargetProject(),
-    'mocks',
-    'fixtures',
-    'minimal-setup',
-  );
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+describe('CLI jiti', () => {
   const envRoot = path.join(E2E_ENVIRONMENTS_DIR, nxTargetProject());
-  const testFileDir = path.join(envRoot, TEST_OUTPUT_DIR, 'convert');
-
-  const schemaName = 'schema';
-
-  const configFilePath = (name: string) =>
-    path.join(process.cwd(), testFileDir, 'config', name);
+  const testFileDir = path.join(envRoot, TEST_OUTPUT_DIR, 'jiti');
+  const schemaFile = path.join(testFileDir, 'src', 'schema.ts');
 
   beforeAll(async () => {
-    await cp(fixtureDummyDir, testFileDir, { recursive: true });
+    await cp(
+      path.join(__dirname, '..', 'mocks', 'fixtures', 'minimal-setup'),
+      testFileDir,
+      { recursive: true },
+    );
     await restoreNxIgnoredFiles(testFileDir);
   });
 
@@ -35,63 +32,55 @@ describe('CLI convert', () => {
     await teardownTestFolder(testFileDir);
   });
 
-  it('should execute convert command', async () => {
+  it('should execute cli over ts-jiti', async () => {
     const { code, stdout } = await executeProcess({
       command: 'npx',
       args: [
         '@push-based/ts-jiti',
-        'convert',
-        path.join(TEST_OUTPUT_DIR, 'convert', 'src', `${schemaName}.ts`),
-        path.join(TEST_OUTPUT_DIR, 'convert', 'src', `args-${schemaName}.json`),
+        'jiti',
+        path.join(testFileDir, 'src', 'cli.ts'),
       ],
       cwd: envRoot,
     });
 
     expect(code).toBe(0);
-    expect(stdout).toContain('Converting 1 schema file');
-
-    const output = await readFile(
-      path.join(testFileDir, 'src', `args-${schemaName}.json`),
-      'utf8',
-    );
-    expect(output).toContain(`$schema`);
+    expect(removeColorCodes(stdout)).toContain('42');
   });
 
-  it('should execute convert command with config file', async () => {
-    const customConfigPath = configFilePath(`custom.${tsconfig}.ts`);
+  it('should execute cli over ts-jiti with path alias', async () => {
+    const tsconfigPath = path.join(testFileDir, 'tsconfig.json');
+    const relativeTsconfigPath = path.relative(envRoot, tsconfigPath);
     const { code, stdout } = await executeProcess({
       command: 'npx',
-      args: ['@push-based/ts-jiti', 'convert', `--config=${customConfigPath}`],
+      args: [
+        '@push-based/ts-jiti',
+        'jiti',
+        `--tsconfig=${relativeTsconfigPath}`,
+        path.join(testFileDir, 'src', 'cli-import-path-alias.ts'),
+      ],
       cwd: envRoot,
     });
 
     expect(code).toBe(0);
-
-    expect(stdout).toContain(`custom.${tsconfig}.ts`);
-
-    const output = await readFile(
-      path.join(
-        process.cwd(),
-        testFileDir,
-        'src',
-        `config-file-${schemaName}.json`,
-      ),
-      'utf8',
-    );
-    expect(JSON.parse(output)).toStrictEqual({
-      $id: 'ExampleSchemaFromConfig',
-      $schema: 'http://json-schema.org/schema',
-      additionalProperties: true,
-      properties: {
-        key: {
-          type: 'string',
-        },
-      },
-      required: ['key'],
-      title: 'Example Schema defined config file',
-      type: 'object',
-    });
+    expect(removeColorCodes(stdout)).toContain('Random number: 42');
   });
 
-  it.todo('should execute convert command with config file and fromPkg');
+  it('should execute cli over ts-jiti with importModule', async () => {
+    const tsconfigPath = path.join(testFileDir, 'tsconfig.json');
+    const relativeTsconfigPath = path.relative(envRoot, tsconfigPath);
+    const { code, stdout } = await executeProcess({
+      command: 'npx',
+      args: [
+        '@push-based/ts-jiti',
+        'jiti',
+        `--tsconfig=${relativeTsconfigPath}`,
+        path.join(testFileDir, 'src', 'cli-load-import.ts'),
+        path.join(testFileDir, 'src', 'utils', 'string.ts'),
+      ],
+      cwd: envRoot,
+    });
+
+    expect(code).toBe(0);
+    expect(removeColorCodes(stdout)).toContain('Random number: 42');
+  });
 });

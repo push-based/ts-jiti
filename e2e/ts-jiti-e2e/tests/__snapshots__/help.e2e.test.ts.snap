@@ -2,40 +2,33 @@
 
 exports[`CLI help > should print help with help command 1`] = `
 "
-Usage: zod-to-nx-schema [command] [options]
+Usage: ts-jiti [command] [options]
 
 Commands:
-  convert                      Converts zod object to Nx schema (default command)
-  print-config                 Print configuration from a config file
+  jiti                         Run jiti with tsconfig-derived options (default command)
+  print-config                 Print resolved jiti configuration from tsconfig
   help                         Print help
 
-Options (for default command):
-  --fromPkg <path>             Path to package.json of the Nx plugin (optional, autoderives schemas)
-  --schema <path>              Path to the module that exports the Zod schema (required)
-  --outPath <path>             Path where the schema.json file should be written (optional, auto-derived if not provided)
-  --exportName <name>          Name of the export (default: 'default')
-  --title <title>              Title for the schema
-  --description <desc>         Description for the schema
-  --skipFormat                 Skip formatting generated files with Prettier
-  --no-includeCommandDefault   Don't add Nx $default for command parameter
-  --no-additionalProperties    Don't allow additional properties
+Options:
+  --tsconfig <path>            Path to TypeScript configuration file
+  --output <path>              Output path for print-config command (prints to stdout if not provided)
+  -h, --help                   Display help information
 
-Options (for print-config command):
-  --config <path>              Path to the config file to print
-  --output <path>              Output file path (optional, prints to stdout if not provided)
+Environment Variables:
+  TSJITI_TS_CONFIG_PATH        Path to TypeScript configuration file (alternative to --tsconfig)
 
 Examples:
-  # Basic usage
-  zod-to-nx-schema --schemaModulePath ./src/schema.ts
+  # Run jiti with tsconfig options
+  ts-jiti jiti ./path/to/module.ts
 
-  # With custom output path
-  zod-to-nx-schema --schemaModulePath ./src/schema.ts --outputPath ./custom.json
+  # Run jiti with custom tsconfig
+  ts-jiti jiti --tsconfig=./tsconfig.json ./path/to/module.ts
 
-  # Print config
-  zod-to-nx-schema print-config --config=./ts-jiti.config.ts
+  # Print resolved jiti configuration
+  ts-jiti print-config --tsconfig=./tsconfig.json
 
-  # Print config to file
-  zod-to-nx-schema print-config --config=./ts-jiti.config.ts --output=config.json
-
+  # Print configuration to file
+  ts-jiti print-config --tsconfig=./tsconfig.json --output=./jiti-config.json
+    
 "
 `;

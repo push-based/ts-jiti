@@ -65,7 +65,7 @@ export function truncateMultilineText(text: string): string {
     return '';
   }
   if (lines.length === 1) {
-    return lines[0];
+    return lines[0] as string;
   }
   return `${lines[0]} ${UNICODE_ELLIPSIS}`;
 }

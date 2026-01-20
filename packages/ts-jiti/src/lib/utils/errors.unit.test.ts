@@ -79,7 +79,7 @@ describe('stringifyError', () => {
         ),
         { oneline: true },
       ),
-    ).toBe('Failed to execute 2 out of 5 plugins: […]');
+    ).toBe('Failed to execute 2 out of 5 plugins: …');
   });
 
   it('should prettify ZodError instances spanning multiple lines', () => {
@@ -155,6 +155,6 @@ describe('stringifyError', () => {
       stringifyError(new SchemaValidationError(error!, schema, {}), {
         oneline: true,
       }),
-    ).toBe(`SchemaValidationError: Invalid ${ansis.bold('User')} […]`);
+    ).toBe(`SchemaValidationError: Invalid ${ansis.bold('User')} …`);
   });
 });

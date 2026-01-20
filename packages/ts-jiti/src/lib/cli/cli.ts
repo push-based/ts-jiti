@@ -12,7 +12,7 @@ import {
 export async function runCli(): Promise<void> {
   const args = process.argv.slice(2);
 
-  const { tsconfig, output } = parseCliArgs(args);
+  const { tsconfig, output, positionalArgs } = parseCliArgs(args);
 
   // - Parses ts-jitienv var process.env[TS_JITI_TS_CONFIG_PATH_ENV_VAR]
   const tsconfigPath = process.env[TS_JITI_TS_CONFIG_PATH_ENV_VAR] ?? tsconfig;
@@ -26,7 +26,7 @@ export async function runCli(): Promise<void> {
   let jitiOptions = {} satisfies JitiOptions;
   if (tsconfigPath) {
     try {
-      jitiOptions = jitiOptionsFromTsConfig(tsconfigPath);
+      jitiOptions = await jitiOptionsFromTsConfig(tsconfigPath);
     } catch (error) {
       // If tsconfig loading fails, continue without config
       console.warn(`Failed to load tsconfig from ${tsconfigPath}:`, error);
@@ -41,5 +41,5 @@ export async function runCli(): Promise<void> {
     return;
   }
 
-  await jitiCommand(jitiOptions);
+  await jitiCommand(jitiOptions, positionalArgs);
 }

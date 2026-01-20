@@ -1,0 +1,9 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "paths": {
+      "@utils": "./packages/utils/src"
+    }
+  },
+  "exclude": ["node_modules", "tmp"]
+}

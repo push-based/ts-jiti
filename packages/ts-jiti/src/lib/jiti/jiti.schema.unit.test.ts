@@ -1,3 +1,5 @@
+import { MEMFS_VOLUME } from '@push-based/test-utils';
+import { vol } from 'memfs';
 import type { CompilerOptions } from 'typescript';
 import {
   mapTsPathsToJitiAlias,
@@ -72,6 +74,73 @@ describe('mapTsPathsToJitiAlias', () => {
       '@': '/base/src',
     });
   });
+
+  describe('with vol.fromJSON file system setup', () => {
+    it('tests both absolute and relative path resolution', () => {
+      // Set up a virtual file system with both absolute and relative path scenarios
+      vol.fromJSON(
+        {
+          // Files to test absolute paths (these should remain unchanged)
+          '/absolute/src/index.ts': 'export const absolute = true;',
+          '/absolute/lib/utils.ts': 'export const utils = true;',
+
+          // Files to test relative paths (these should be resolved relative to baseUrl)
+          'project/src/components/Button.ts': 'export const Button = () => {};',
+          'project/lib/helpers.ts': 'export const helpers = () => {};',
+
+          // Base directory structure
+          'project/package.json': '{"name": "test-project"}',
+        },
+        MEMFS_VOLUME,
+      );
+
+      const baseUrl = '/test/project';
+
+      // Test case 1: Absolute paths should remain absolute
+      const absolutePathsResult = mapTsPathsToJitiAlias(
+        {
+          '@absolute/*': ['/absolute/src/*'],
+          '~/*': ['/absolute/lib/*'],
+        },
+        baseUrl,
+      );
+
+      expect(absolutePathsResult).toStrictEqual({
+        '@absolute': '/absolute/src',
+        '~': '/absolute/lib',
+      });
+
+      // Test case 2: Relative paths should be resolved relative to baseUrl
+      const relativePathsResult = mapTsPathsToJitiAlias(
+        {
+          '@/*': ['src/*'],
+          'helpers/*': ['lib/*'],
+        },
+        baseUrl,
+      );
+
+      expect(relativePathsResult).toStrictEqual({
+        '@': '/test/project/src',
+        helpers: '/test/project/lib',
+      });
+
+      // Test case 3: Mixed absolute and relative paths
+      const mixedPathsResult = mapTsPathsToJitiAlias(
+        {
+          '@/*': ['src/*'], // relative -> should resolve to /test/project/src
+          '~/*': ['/absolute/lib/*'], // absolute -> should remain /absolute/lib
+          'components/*': ['src/components/*'], // relative -> should resolve to /test/project/src/components
+        },
+        baseUrl,
+      );
+
+      expect(mixedPathsResult).toStrictEqual({
+        '@': '/test/project/src',
+        '~': '/absolute/lib',
+        components: '/test/project/src/components',
+      });
+    });
+  });
 });
 
 describe('parseTsConfigToJitiConfig', () => {
@@ -112,7 +181,7 @@ describe('parseTsConfigToJitiConfig', () => {
 
   it('includes jsx when jsx is set and not zero', () => {
     const compilerOptions: CompilerOptions = {
-      jsx: 2, // JsxEmit.React
+      jsx: 'react', // JsxEmit.React
     };
 
     expect(parseTsConfigToJitiConfig(compilerOptions)).toStrictEqual({
@@ -120,9 +189,9 @@ describe('parseTsConfigToJitiConfig', () => {
     });
   });
 
-  it('excludes jsx when jsx is zero', () => {
+  it('excludes jsx when jsx is none', () => {
     const compilerOptions: CompilerOptions = {
-      jsx: 0, // JsxEmit.None
+      jsx: 'none', // JsxEmit.None
     };
 
     expect(parseTsConfigToJitiConfig(compilerOptions)).toStrictEqual({});
@@ -134,7 +203,7 @@ describe('parseTsConfigToJitiConfig', () => {
       baseUrl: '/base',
       esModuleInterop: true,
       sourceMap: false,
-      jsx: 1, // JsxEmit.Preserve
+      jsx: 'preserve', // JsxEmit.Preserve
     };
 
     expect(parseTsConfigToJitiConfig(compilerOptions)).toStrictEqual({

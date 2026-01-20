@@ -1,6 +1,6 @@
 # @push-based/ts-jiti
 
-A TypeScript library and CLI tool that loads TypeScript configuration files and converts them to jiti-compatible options, enabling proper module resolution with TypeScript path aliases in monorepo environments.
+TypeScript path aliases don't work at runtime. **ts-jiti** bridges this gap by converting `tsconfig.json` paths into jiti-compatible aliases for perfect monorepo execution.
 
 ## Features
 
@@ -25,6 +25,10 @@ npm install @push-based/ts-jiti
 ```bash
 # Print resolved jiti configuration from tsconfig.json
 npx ts-jiti print-config --tsconfig=./tsconfig.json
+
+# Print resolved jiti options from termonal args as well as onfiguration from tsconfig.json
+npx ts-jiti print-config --tsconfig=./tsconfig.json --
+
 
 # Print configuration to a file
 npx ts-jiti print-config --tsconfig=./tsconfig.json --output=./resolved-config.json

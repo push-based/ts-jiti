@@ -49,7 +49,7 @@ export async function readTscByPath(
     throw new Error(`Tsconfig file not found at path: ${tsconfigPath}`);
   }
 
-  const { options } = await loadTargetConfig(tsconfigPath);
+  const { options } = loadTargetConfig(tsconfigPath);
   return options;
 }
 

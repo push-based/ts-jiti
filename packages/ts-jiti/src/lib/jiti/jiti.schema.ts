@@ -1,6 +1,6 @@
 import type { JitiOptions } from 'jiti';
 import path from 'node:path';
-import type { CompilerOptions } from 'typescript';
+import type { CompilerOptions, JsxEmit } from 'typescript';
 
 /**
  * Converts TypeScript paths configuration to jiti alias format
@@ -71,7 +71,9 @@ export function parseTsConfigToJitiConfig(
     ...(compilerOptions.sourceMap == null
       ? {}
       : { sourceMaps: compilerOptions.sourceMap }),
-    ...(compilerOptions.jsx != null && compilerOptions.jsx !== 0
+    ...(compilerOptions.jsx != null &&
+      compilerOptions.jsx !== 0 &&
+      compilerOptions.jsx !== 'none'
       ? { jsx: true }
       : {}),
   };

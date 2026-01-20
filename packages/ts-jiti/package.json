@@ -1,6 +1,6 @@
 {
   "name": "@push-based/ts-jiti",
-  "version": "0.0.2",
+  "version": "0.0.1",
   "private": false,
   "type": "module",
   "main": "./src/index.js",
@@ -12,7 +12,7 @@
     "node": ">=20.0.0"
   },
   "scripts": {},
-  "description": "TypeScript library and CLI tool for loading TypeScript configs and converting them to jiti-compatible options",
+  "description": "TypeScript library and CLI tool that loads TypeScript configuration files and converts them to jiti-compatible options, enabling proper module resolution with TypeScript path aliases in monorepo environments",
   "author": "Michael Hladky",
   "license": "MIT",
   "repository": {
