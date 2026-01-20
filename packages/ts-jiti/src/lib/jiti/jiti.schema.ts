@@ -21,7 +21,7 @@ export function mapTsPathsToJitiAlias(
       .map(([pathPattern, pathMappings]) => {
         // Remove the /* from the end if present
         const aliasKey = pathPattern.replace(/\/\*$/, '');
-        const aliasValue = pathMappings[0].replace(/\/\*$/, ''); // We know this exists due to filter
+        const aliasValue = pathMappings[0]!.replace(/\/\*$/, ''); // We know this exists due to filter
 
         // Resolve relative paths to absolute paths
         const resolvedAliasValue = path.isAbsolute(aliasValue)

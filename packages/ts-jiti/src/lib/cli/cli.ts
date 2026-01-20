@@ -23,7 +23,7 @@ export async function runCli(): Promise<void> {
   }
 
   // Load tsconfig if provided and parse it for jiti options
-  const jitiOptions = {} satisfies JitiOptions;
+  let jitiOptions = {} satisfies JitiOptions;
   if (tsconfigPath) {
     try {
       jitiOptions = jitiOptionsFromTsConfig(tsconfigPath);

@@ -33,7 +33,9 @@ describe('readTscByPath', () => {
   });
 
   beforeEach(() => {
-    vi.mocked(logger.task).mockImplementation(async (message, fn) => fn());
+    vi.mocked(logger.task).mockImplementation(async (message, fn) => {
+      await fn();
+    });
   });
 
   it('returns parsed JSON when reading config file', async () => {
