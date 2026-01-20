@@ -5,7 +5,8 @@
   "projectType": "library",
   "targets": {
     "build": {},
-    "lint": {}
+    "lint": {},
+    "unit-test": {}
   },
   "tags": ["scope:shared", "type:testing"]
 }

@@ -14,7 +14,6 @@ export async function runCli(): Promise<void> {
 
   const { tsconfig, output, positionalArgs } = parseCliArgs(args);
 
-  // - Parses ts-jitienv var process.env[TS_JITI_TS_CONFIG_PATH_ENV_VAR]
   const tsconfigPath = process.env[TS_JITI_TS_CONFIG_PATH_ENV_VAR] ?? tsconfig;
 
   if (isHelpCommand(args)) {
@@ -28,7 +27,6 @@ export async function runCli(): Promise<void> {
     try {
       jitiOptions = await jitiOptionsFromTsConfig(tsconfigPath);
     } catch (error) {
-      // If tsconfig loading fails, continue without config
       console.warn(`Failed to load tsconfig from ${tsconfigPath}:`, error);
     }
   }

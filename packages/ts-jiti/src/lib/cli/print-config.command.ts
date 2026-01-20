@@ -16,7 +16,7 @@ export async function printConfigCommand(
 ) {
   const { output, tsconfigPath } = o ?? {};
   const json = {
-    tsconfigPath,
+    tsconfigPath: tsconfigPath ? path.resolve(tsconfigPath) : tsconfigPath,
     ...opt,
   };
   const jsonOutput = JSON.stringify(json, null, 2);

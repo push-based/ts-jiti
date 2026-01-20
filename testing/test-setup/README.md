@@ -2,9 +2,11 @@
 
 This library contains test setup.
 
+More on this subject as well as all the testing strategy principles can be found on the GitHub [wiki](https://github.com/code-pushup/cli/wiki/Testing-Strategy#mocking).
+
 ## Shared config
 
-See [` @push-based/test-setup-config` docs](../test-setup-config/README.md) on how to use our Vitest config factory.
+See [`@push-based/test-setup-config` docs](../test-setup-config/README.md) on how to use our Vitest config factory.
 
 ## Mock setup
 

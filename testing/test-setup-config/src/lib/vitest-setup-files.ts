@@ -9,7 +9,7 @@ import type { TestKind } from './vitest-config-factory.js';
  */
 const CUSTOM_MATCHERS = [
   '../../testing/test-setup/src/lib/extend/jest-extended.matcher.ts',
-  '../../testing/test-setup/src/lib/extend/path.matcher.ts',
+  '../../testing/test-setup/src/lib/extend/path.matcher.ts'
 ] as const;
 
 /**

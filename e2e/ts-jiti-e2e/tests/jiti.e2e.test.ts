@@ -28,16 +28,16 @@ describe('CLI jiti', () => {
   });
 
   afterAll(async () => {
-    await teardownTestFolder(testFileDir);
+   //  await teardownTestFolder(testFileDir);
   });
 
-  it('should execute cli over ts-jiti', async () => {
+  it('should execute cli over ts-jiti default', async () => {
     const { code, stdout } = await executeProcess({
       command: 'npx',
       args: [
         '@push-based/ts-jiti',
         'jiti',
-        path.join(testFileDir, 'src', 'cli.ts'),
+        path.relative(envRoot, path.join(testFileDir, 'src', 'cli.ts')),
       ],
       cwd: envRoot,
     });
@@ -55,7 +55,7 @@ describe('CLI jiti', () => {
         '@push-based/ts-jiti',
         'jiti',
         `--tsconfig=${relativeTsconfigPath}`,
-        path.join(testFileDir, 'src', 'cli-import-path-alias.ts'),
+        path.relative(envRoot, path.join(testFileDir, 'src', 'cli-import-path-alias.ts')),
       ],
       cwd: envRoot,
     });
@@ -73,8 +73,8 @@ describe('CLI jiti', () => {
         '@push-based/ts-jiti',
         'jiti',
         `--tsconfig=${relativeTsconfigPath}`,
-        path.join(testFileDir, 'src', 'cli-load-import.ts'),
-        path.join(testFileDir, 'src', 'utils', 'string.ts'),
+        path.relative(envRoot, path.join(testFileDir, 'src', 'cli-load-import.ts')),
+        path.relative(envRoot, path.join(testFileDir, 'src', 'utils', 'string.ts')),
       ],
       cwd: envRoot,
     });

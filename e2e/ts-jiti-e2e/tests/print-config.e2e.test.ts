@@ -7,7 +7,7 @@ import {
   teardownTestFolder,
 } from '@push-based/test-utils';
 import { executeProcess, tsconfig } from '@push-based/ts-jiti';
-import { cp } from 'node:fs/promises';
+import { cp, mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { beforeAll, expect } from 'vitest';
@@ -35,6 +35,16 @@ describe('CLI print-config', () => {
   beforeAll(async () => {
     await cp(fixtureDummyDir, testFileDir, { recursive: true });
     await restoreNxIgnoredFiles(testFileDir);
+    // Create config directory and copy tsconfig there with adjusted paths
+    const configDir = path.join(testFileDir, 'config');
+    await mkdir(configDir, { recursive: true });
+    const tsconfigContent = await readFile(path.join(testFileDir, 'tsconfig.json'), 'utf-8');
+    const adjustedTsconfig = tsconfigContent
+      .replace('"./src/**/*.ts"', '"../src/**/*.ts"')
+      .replace('"./src/**/*.test.ts"', '"../src/**/*.test.ts"')
+      .replace('"./dist"', '"../dist"')
+      .replace('"baseUrl": "."', '"baseUrl": ".."');
+    await writeFile(path.join(configDir, 'tsconfig.json'), adjustedTsconfig);
   });
 
   afterAll(async () => {
@@ -63,7 +73,7 @@ describe('CLI print-config', () => {
         'tmp/e2e/ts-jiti-e2e/__test__/print-config/config/tsconfig.json',
       ),
       alias: {
-        '@utils/*': expect.pathToEndWith(
+        '@utils': expect.pathToEndWith(
           'tmp/e2e/ts-jiti-e2e/__test__/print-config/src/utils',
         ),
       },

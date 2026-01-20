@@ -57,7 +57,7 @@ describe('Original jiti cli', () => {
     await teardownTestFolder(testFileDir);
   });
 
-  it('should execute cli over jiti', async () => {
+  it('should execute cli over original jiti default', async () => {
     const { code, stdout } = await executeProcess({
       command: 'npx',
       args: ['-y', 'jiti', path.join(TEST_OUTPUT_DIR, 'jiti', 'src', 'cli.ts')],
@@ -68,7 +68,7 @@ describe('Original jiti cli', () => {
     expect(removeColorCodes(stdout)).toContain('42');
   });
 
-  it('should FAIL jiti with code depending on path alias', async () => {
+  it('should FAIL original jiti with code depending on path alias', async () => {
     const { code, stderr } = await executeProcess({
       command: 'npx',
       args: [
@@ -77,13 +77,34 @@ describe('Original jiti cli', () => {
         path.join(TEST_OUTPUT_DIR, 'jiti', 'src', 'cli-import-path-alias.ts'),
       ],
       cwd: envRoot,
+      ignoreExitCode: true,
     });
 
     expect(code).not.toBe(0);
-    expect(removeColorCodes(stderr)).toMatchInlineSnapshot();
+    expect(removeColorCodes(stderr)).toMatchInlineSnapshot(`
+      "Error: Cannot find module '@utils/string'
+      Require stack:
+      - /Users/michael_hladky/WebstormProjects/ts-jiti/tmp/e2e/ts-jiti-e2e/__test__/jiti/src/cli-import-path-alias.ts
+          at Module._resolveFilename (node:internal/modules/cjs/loader:1405:15)
+          at require.resolve (node:internal/modules/helpers:145:19)
+          at jitiResolve (/Users/michael_hladky/WebstormProjects/ts-jiti/tmp/e2e/ts-jiti-e2e/node_modules/jiti/dist/jiti.cjs:1:148703)
+          at jitiRequire (/Users/michael_hladky/WebstormProjects/ts-jiti/tmp/e2e/ts-jiti-e2e/node_modules/jiti/dist/jiti.cjs:1:150290)
+          at import (/Users/michael_hladky/WebstormProjects/ts-jiti/tmp/e2e/ts-jiti-e2e/node_modules/jiti/dist/jiti.cjs:1:158307)
+          at /Users/michael_hladky/WebstormProjects/ts-jiti/tmp/e2e/ts-jiti-e2e/__test__/jiti/src/cli-import-path-alias.ts:2:34
+          at eval_evalModule (/Users/michael_hladky/WebstormProjects/ts-jiti/tmp/e2e/ts-jiti-e2e/node_modules/jiti/dist/jiti.cjs:1:155533)
+          at jitiRequire (/Users/michael_hladky/WebstormProjects/ts-jiti/tmp/e2e/ts-jiti-e2e/node_modules/jiti/dist/jiti.cjs:1:150967)
+          at Function.import (/Users/michael_hladky/WebstormProjects/ts-jiti/tmp/e2e/ts-jiti-e2e/node_modules/jiti/dist/jiti.cjs:1:158307)
+          at file:///Users/michael_hladky/WebstormProjects/ts-jiti/tmp/e2e/ts-jiti-e2e/node_modules/jiti/lib/jiti-cli.mjs:31:18 {
+        code: 'MODULE_NOT_FOUND',
+        requireStack: [
+          '/Users/michael_hladky/WebstormProjects/ts-jiti/tmp/e2e/ts-jiti-e2e/__test__/jiti/src/cli-import-path-alias.ts'
+        ]
+      }
+      "
+    `);
   });
 
-  it('should run jiti with environment variables', async () => {
+  it('should run original jiti with environment variables', async () => {
     const { code, stderr } = await executeProcess({
       command: 'npx',
       args: [
@@ -92,15 +113,18 @@ describe('Original jiti cli', () => {
         path.join(TEST_OUTPUT_DIR, 'jiti', 'src', 'cli-import-path-alias.ts'),
       ],
       cwd: envRoot,
+      ignoreExitCode: true,
       env: {
-        ...jitiEnvVarsDefaults(),
         JITI_ALIAS: JSON.stringify({
-          '@utils': path.join(TEST_OUTPUT_DIR, 'jiti', 'src', 'utils'),
+          '@utils': path.join(envRoot, TEST_OUTPUT_DIR, 'jiti', 'src', 'utils'),
         }),
       },
     });
 
     expect(code).not.toBe(0);
-    expect(removeColorCodes(stderr)).toMatchInlineSnapshot();
+    expect(removeColorCodes(stderr)).toMatchInlineSnapshot(`
+      "env: node: No such file or directory
+      "
+    `);
   });
 });

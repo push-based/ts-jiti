@@ -1,14 +1,13 @@
-import { workspaceRoot } from '@nx/devkit';
 import path from 'node:path';
 import { loadConfig } from 'tsconfig-paths';
 import type { Alias, AliasOptions } from 'vite';
 
 /**
  * Loads TypeScript path aliases from tsconfig.base.json for use in Vitest.
- * Uses workspace root to load the tsconfig.
+ * Uses process.cwd() as the workspace root to load the tsconfig.
  */
 export function tsconfigPathAliases(): AliasOptions {
-  const tsconfigPath = path.resolve(workspaceRoot, 'tsconfig.base.json');
+  const tsconfigPath = path.resolve(process.cwd(), 'tsconfig.base.json');
   const result = loadConfig(tsconfigPath);
 
   if (result.resultType === 'failed') {
@@ -23,8 +22,8 @@ export function tsconfigPathAliases(): AliasOptions {
     .map(
       ([importPath, relativePath]): Alias => ({
         find: importPath,
-        // Make paths relative to workspace root
-        replacement: path.resolve(workspaceRoot, relativePath),
+        // Make paths relative to workspace root (../../ from config file)
+        replacement: path.resolve(process.cwd(), relativePath),
       }),
     );
 }

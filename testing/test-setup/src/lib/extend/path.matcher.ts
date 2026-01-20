@@ -1,6 +1,6 @@
-import { osAgnosticPath } from '@push-based/test-utils';
 import type { SyncExpectationResult } from '@vitest/expect';
 import { expect } from 'vitest';
+import { osAgnosticPath } from '@push-based/test-utils';
 
 export type CustomPathMatchers = {
   toMatchPath: (path: string) => void;

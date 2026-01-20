@@ -1,8 +1,8 @@
+import { afterEach, beforeEach, vi } from 'vitest';
 import {
   MockPerformanceObserver,
   createPerformanceMock,
 } from '@push-based/test-utils';
-import { afterEach, beforeEach, vi } from 'vitest';
 
 const MOCK_TIME_ORIGIN = 500_000;
 
