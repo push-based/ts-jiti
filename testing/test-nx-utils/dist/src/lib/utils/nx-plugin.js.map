@@ -1,0 +1,1 @@
+{"version":3,"file":"nx-plugin.js","sourceRoot":"","sources":["../../../../src/lib/utils/nx-plugin.ts"],"names":[],"mappings":"AAEA,MAAM,UAAU,oBAAoB,CAClC,OAAuC;IAEvC,MAAM,EAAE,aAAa,GAAG,OAAO,CAAC,GAAG,EAAE,EAAE,mBAAmB,GAAG,EAAE,EAAE,GAC/D,OAAO,IAAI,EAAE,CAAC;IAChB,OAAO;QACL,aAAa;QACb,mBAAmB;KACpB,CAAC;AACJ,CAAC"}

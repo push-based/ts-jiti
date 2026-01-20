@@ -1,0 +1,54 @@
+{
+  "name": "@push-based/ts-jiti",
+  "version": "0.0.2",
+  "private": false,
+  "type": "module",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "bin": {
+    "ts-jiti": "./src/bin/bin.js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {},
+  "description": "TypeScript library and CLI tool for loading TypeScript configs and converting them to jiti-compatible options",
+  "author": "Michael Hladky",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/push-based/ts-jiti.git",
+    "directory": "tools/ts-jiti"
+  },
+  "keywords": [
+    "typescript",
+    "jiti",
+    "tsconfig",
+    "path-aliases",
+    "monorepo",
+    "module-resolution"
+  ],
+  "files": [
+    "src/*",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "tslib": "^2.8.1",
+    "ansis": "^3.3.2",
+    "ora": "^9.0.0",
+    "jiti": "^2.4.2",
+    "typescript": "5.7.3"
+  },
+  "peerDependencies": {
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/json-schema": "^7.0.15",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0",
+    "zod": "^4.0.0"
+  }
+}
