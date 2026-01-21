@@ -17,6 +17,12 @@ export function mapTsPathsToJitiAlias(
       if (!Array.isArray(pathMappings) || pathMappings.length === 0) {
         return aliases;
       }
+      // Jiti does not support overloads (multiple mappings for the same path pattern)
+      if (pathMappings.length > 1) {
+        throw new Error(
+          `TypeScript path overloads are not supported by jiti. Path pattern '${pathPattern}' has ${pathMappings.length} mappings: ${pathMappings.join(', ')}. Jiti only supports a single alias mapping per pattern.`,
+        );
+      }
       const aliasKey = pathPattern.replace(/\/\*$/, '');
       const aliasValue = (pathMappings.at(0) as string).replace(/\/\*$/, '');
       return {

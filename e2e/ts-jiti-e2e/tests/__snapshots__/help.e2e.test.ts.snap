@@ -15,7 +15,7 @@ Options:
   -h, --help                   Display help information
 
 Environment Variables:
-  TSJITI_TS_CONFIG_PATH        Path to TypeScript configuration file (alternative to --tsconfig)
+  JITI_TS_CONFIG_PATH          Path to TypeScript configuration file (alternative to --tsconfig)
 
 Examples:
   # Run jiti with tsconfig options

@@ -5,7 +5,7 @@ import {
   type MappableJitiOptions,
   parseTsConfigToJitiConfig,
 } from './jiti.schema.js';
-import { readTscByPath } from './read-ts-config-file.js';
+import { deriveTsConfig } from './read-ts-config-file.js';
 
 /**
  * Create a jiti instance with options derived from tsconfig.
@@ -33,7 +33,7 @@ export async function createTsJiti(
 export async function jitiOptionsFromTsConfig(
   tsconfigPath: string,
 ): Promise<MappableJitiOptions> {
-  const compilerOptions = await readTscByPath(tsconfigPath);
+  const compilerOptions = await deriveTsConfig(tsconfigPath);
   const tsconfigDir = path.dirname(tsconfigPath);
   return parseTsConfigToJitiConfig(compilerOptions, tsconfigDir);
 }

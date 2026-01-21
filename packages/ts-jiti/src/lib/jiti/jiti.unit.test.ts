@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { fileExists } from '../utils/file-system.js';
 import { createTsJiti, importModule, jitiOptionsFromTsConfig } from './jiti.js';
 import { parseTsConfigToJitiConfig } from './jiti.schema.js';
-import { readTscByPath } from './read-ts-config-file.js';
+import { deriveTsConfig } from './read-ts-config-file.js';
 
 vi.mock('jiti', () => ({
   createJiti: vi.fn(),
@@ -38,7 +38,7 @@ describe('createTsJiti', () => {
       main: undefined,
     } as unknown as Jiti;
     vi.mocked(createJiti).mockReturnValue(mockJitiInstance);
-    vi.mocked(readTscByPath).mockResolvedValue({
+    vi.mocked(deriveTsConfig).mockResolvedValue({
       paths: { '@/*': ['./src/*'] },
     });
     vi.mocked(parseTsConfigToJitiConfig).mockReturnValue({
@@ -50,7 +50,7 @@ describe('createTsJiti', () => {
       sourceMaps: false,
     });
 
-    expect(readTscByPath).toHaveBeenCalledWith('/test/tsconfig.json');
+    expect(deriveTsConfig).toHaveBeenCalledWith('/test/tsconfig.json');
     expect(parseTsConfigToJitiConfig).toHaveBeenCalledWith({
       paths: { '@/*': ['./src/*'] },
     }, '/test');
@@ -82,7 +82,7 @@ describe('createTsJiti', () => {
       sourceMaps: false,
     });
 
-    expect(readTscByPath).not.toHaveBeenCalled();
+    expect(deriveTsConfig).not.toHaveBeenCalled();
     expect(parseTsConfigToJitiConfig).not.toHaveBeenCalled();
     expect(createJiti).toHaveBeenCalledWith('/test/file.js', {
       sourceMaps: false,
@@ -97,14 +97,37 @@ describe('jitiOptionsFromTsConfig', () => {
     const mockCompilerOptions = { paths: { '@/*': ['./src/*'] } };
     const mockJitiOptions = { alias: { '@': '/path/to/src' } };
 
-    vi.mocked(readTscByPath).mockResolvedValue(mockCompilerOptions);
+    vi.mocked(deriveTsConfig).mockResolvedValue(mockCompilerOptions);
     vi.mocked(parseTsConfigToJitiConfig).mockReturnValue(mockJitiOptions);
 
     const result = await jitiOptionsFromTsConfig('/test/tsconfig.json');
 
-    expect(readTscByPath).toHaveBeenCalledWith('/test/tsconfig.json');
+    expect(deriveTsConfig).toHaveBeenCalledWith('/test/tsconfig.json');
     expect(parseTsConfigToJitiConfig).toHaveBeenCalledWith(mockCompilerOptions, '/test');
     expect(result).toBe(mockJitiOptions);
+  });
+
+  it('throws error when tsconfig has path overloads (multiple mappings)', async () => {
+    vi.clearAllMocks();
+    const mockCompilerOptions = {
+      paths: {
+        // Multiple mappings - overloads not supported
+        '@/*': ['./src/*', './lib/*'], 
+      },
+      baseUrl: '/test',
+    };
+
+    vi.mocked(deriveTsConfig).mockResolvedValue(mockCompilerOptions);
+    const actualModule = await vi.importActual<typeof import('./jiti.schema.js')>('./jiti.schema.js');
+    vi.mocked(parseTsConfigToJitiConfig).mockImplementation(actualModule.parseTsConfigToJitiConfig);
+
+    await expect(
+      jitiOptionsFromTsConfig('/test/tsconfig.json'),
+    ).rejects.toThrow(
+      "TypeScript path overloads are not supported by jiti. Path pattern '@/*' has 2 mappings: ./src/*, ./lib/*. Jiti only supports a single alias mapping per pattern.",
+    );
+
+    expect(deriveTsConfig).toHaveBeenCalledWith('/test/tsconfig.json');
   });
 });
 
@@ -125,7 +148,7 @@ describe('importModule', () => {
     } as unknown as Jiti;
     vi.mocked(createJiti).mockReturnValue(mockJitiInstance);
     vi.mocked(fileExists).mockResolvedValue(true);
-    vi.mocked(readTscByPath).mockResolvedValue({});
+    vi.mocked(deriveTsConfig).mockResolvedValue({});
     vi.mocked(parseTsConfigToJitiConfig).mockReturnValue({});
 
     const result = await importModule({
@@ -160,7 +183,7 @@ describe('importModule', () => {
     } as unknown as Jiti;
     vi.mocked(createJiti).mockReturnValue(mockJitiInstance);
     vi.mocked(fileExists).mockResolvedValue(true);
-    vi.mocked(readTscByPath).mockResolvedValue({});
+    vi.mocked(deriveTsConfig).mockResolvedValue({});
     vi.mocked(parseTsConfigToJitiConfig).mockReturnValue({});
 
     const result = await importModule({

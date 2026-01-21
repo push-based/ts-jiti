@@ -54,7 +54,7 @@ npx ts-jiti print-config --tsconfig=./tsconfig.json
 npx ts-jiti print-config --tsconfig=./tsconfig.json --output=./resolved-config.json
 
 # Use environment variable for tsconfig path
-TSJITI_TS_CONFIG_PATH=./tsconfig.json npx ts-jiti print-config
+JITI_TS_CONFIG_PATH=./tsconfig.json npx ts-jiti print-config
 ```
 
 ### `jiti`
@@ -66,7 +66,7 @@ Runs the jiti command line tool with options derived from a TypeScript configura
 npx ts-jiti jiti --tsconfig=./tsconfig.json ./path/to/module.ts
 
 # Use environment variable for tsconfig path
-TSJITI_TS_CONFIG_PATH=./tsconfig.json npx ts-jiti jiti ./path/to/module.ts
+JITI_TS_CONFIG_PATH=./tsconfig.json npx ts-jiti jiti ./path/to/module.ts
 ```
 
 ### `help`
@@ -89,7 +89,7 @@ npx ts-jiti -h
 
 **Environment Variables:**
 
-- `TSJITI_TS_CONFIG_PATH` — Path to TypeScript configuration file (alternative to `--tsconfig`)
+- `JITI_TS_CONFIG_PATH` — Path to TypeScript configuration file (alternative to `--tsconfig`)
 
 **Positional Arguments:**
 

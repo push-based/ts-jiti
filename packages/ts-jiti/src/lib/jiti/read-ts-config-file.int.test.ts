@@ -3,7 +3,7 @@ import { rm } from 'node:fs/promises';
 import path from 'node:path';
 import * as tsModule from 'typescript';
 import { describe, expect, it } from 'vitest';
-import { loadTargetConfig, readTscByPath } from './read-ts-config-file.js';
+import { loadTargetConfig, deriveTsConfig } from './read-ts-config-file.js';
 
 const TEST_OUTPUT_BASE = 'packages/ts-jiti/tmp';
 
@@ -120,7 +120,7 @@ describe('loadTargetConfig', () => {
   });
 });
 
-describe('readTscByPath', () => {
+describe('deriveTsConfig', () => {
   const testDir = path.join(TEST_OUTPUT_BASE, 'read-tsc-by-path');
 
   afterAll(async () => {
@@ -151,7 +151,7 @@ describe('readTscByPath', () => {
       'tsconfig.json',
     );
 
-    await expect(readTscByPath(configPath)).resolves.toStrictEqual({
+    await expect(deriveTsConfig(configPath)).resolves.toStrictEqual({
       configFilePath: expect.any(String),
       paths: {
         '@app/*': ['src/*'],
@@ -166,12 +166,12 @@ describe('readTscByPath', () => {
   });
 
   it('should throw if the path is empty', async () => {
-    await expect(readTscByPath('')).rejects.toThrow(/Tsconfig file not found/);
+    await expect(deriveTsConfig('')).rejects.toThrow(/Tsconfig file not found/);
   });
 
   it('should throw if the file does not exist', async () => {
     await expect(
-      readTscByPath(path.join('non-existent', 'tsconfig.json')),
+      deriveTsConfig(path.join('non-existent', 'tsconfig.json')),
     ).rejects.toThrow(/Tsconfig file not found/);
   });
 });

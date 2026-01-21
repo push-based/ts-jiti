@@ -58,27 +58,27 @@ console.log(\`Executed over ts-jiti\`);
     const d = getTestDir('load-ts');
     const cleanup = await fsFromJson({
       [path.join(d, 'a.js')]: `import { x } from './b.ts'; console.log(x);`,
-      [path.join(d, 'b.ts')]: `export const x = 'ok';`,
+      [path.join(d, 'b.ts')]: `export const x = 'load-ts';`,
     });
     await expect(executeProcess({
       command: 'npx',
       args: ['@push-based/ts-jiti', path.relative(envRoot, path.join(d, 'a.js'))],
       cwd: envRoot,
       silent: true,
-    })).resolves.toMatchObject({ code: 0, stdout: expect.stringContaining('ok') });
+    })).resolves.toMatchObject({ code: 0, stdout: expect.stringContaining('load-ts') });
     await cleanup();
   });
   it('should exec .ts', async () => {
     const d = getTestDir('exec-ts');
     const cleanup = await fsFromJson({
-      [path.join(d, 'a.ts')]: `console.log('ok');`,
+      [path.join(d, 'a.ts')]: `console.log('exec-ts');`,
     });
     await expect(executeProcess({
       command: 'npx',
       args: ['@push-based/ts-jiti', path.relative(envRoot, path.join(d, 'a.ts'))],
       cwd: envRoot,
       silent: true,
-    })).resolves.toMatchObject({ code: 0, stdout: expect.stringContaining('ok') });
+    })).resolves.toMatchObject({ code: 0, stdout: expect.stringContaining('exec-ts') });
     await cleanup();
   });
 
@@ -86,14 +86,14 @@ console.log(\`Executed over ts-jiti\`);
     const d = getTestDir('exec-ts-load-ts');
     const cleanup = await fsFromJson({
       [path.join(d, 'a.ts')]: `import { x } from './b.js'; console.log(x);`,
-      [path.join(d, 'b.ts')]: `export const x = 'ok';`,
+      [path.join(d, 'b.ts')]: `export const x = 'exec-ts-load-ts';`,
     });
     await expect(executeProcess({
       command: 'npx',
       args: ['@push-based/ts-jiti', path.relative(envRoot, path.join(d, 'a.ts'))],
       cwd: envRoot,
       silent: true,
-    })).resolves.toMatchObject({ code: 0, stdout: expect.stringContaining('ok') });
+    })).resolves.toMatchObject({ code: 0, stdout: expect.stringContaining('exec-ts-load-ts') });
     await cleanup();
   });
 
@@ -102,14 +102,15 @@ console.log(\`Executed over ts-jiti\`);
     const cleanup = await fsFromJson({
       [path.join(d, 'tsconfig.json')]: { compilerOptions: { baseUrl: '.', paths: { '@/*': ['./*'] } } },
       [path.join(d, 'a.ts')]: `import { x } from '@/b.js'; console.log(x);`,
-      [path.join(d, 'b.ts')]: `export const x = 'ok';`,
+      [path.join(d, 'b.ts')]: `export const x = 'exec-ts-tsconfig-load-ts';`,
     });
     await expect(executeProcess({
       command: 'npx',
-      args: ['@push-based/ts-jiti', `--tsconfig=${path.relative(envRoot, path.join(d, 'tsconfig.json'))}`, path.relative(envRoot, path.join(d, 'a.ts'))],
+      args: ['@push-based/ts-jiti', path.relative(envRoot, path.join(d, 'a.ts'))],
       cwd: envRoot,
+      env: { ...process.env, JITI_TS_CONFIG_PATH: path.relative(envRoot, path.join(d, 'tsconfig.json')) },
       silent: true,
-    })).resolves.toMatchObject({ code: 0, stdout: expect.stringContaining('ok') });
+    })).resolves.toMatchObject({ code: 0, stdout: expect.stringContaining('exec-ts-tsconfig-load-ts') });
     await cleanup();
   });
 
@@ -119,14 +120,15 @@ console.log(\`Executed over ts-jiti\`);
       [path.join(d, 'tsconfig.json')]: { compilerOptions: { baseUrl: '.', paths: { '@/*': ['./*'] } } },
       [path.join(d, 'a.ts')]: `import { x } from '@/b.js'; console.log(x);`,
       [path.join(d, 'b.ts')]: `import { y } from '@/c.js'; export const x = y;`,
-      [path.join(d, 'c.ts')]: `export const y = 'ok';`,
+      [path.join(d, 'c.ts')]: `export const y = 'exec-ts-tsconfig-load-ts-tsconfig';`,
     });
     await expect(executeProcess({
       command: 'npx',
-      args: ['@push-based/ts-jiti', `--tsconfig=${path.relative(envRoot, path.join(d, 'tsconfig.json'))}`, path.relative(envRoot, path.join(d, 'a.ts'))],
+      args: ['@push-based/ts-jiti', path.relative(envRoot, path.join(d, 'a.ts'))],
       cwd: envRoot,
+      env: { ...process.env, JITI_TS_CONFIG_PATH: path.relative(envRoot, path.join(d, 'tsconfig.json')) },
       silent: true,
-    })).resolves.toMatchObject({ code: 0, stdout: expect.stringContaining('ok') });
+    })).resolves.toMatchObject({ code: 0, stdout: expect.stringContaining('exec-ts-tsconfig-load-ts-tsconfig') });
     await cleanup();
   });
 

@@ -37,10 +37,12 @@ describe('mapTsPathsToJitiAlias', () => {
     ).toStrictEqual({ '@': '/absolute/path' });
   });
 
-  it('uses first mapping when multiple exist', () => {
-    expect(
+  it('throws error when path overloads exist (multiple mappings)', () => {
+    expect(() =>
       mapTsPathsToJitiAlias({ '@/*': ['first/*', 'second/*'] }, '/base'),
-    ).toStrictEqual({ '@': '/base/first' });
+    ).toThrow(
+      "TypeScript path overloads are not supported by jiti. Path pattern '@/*' has 2 mappings: first/*, second/*. Jiti only supports a single alias mapping per pattern.",
+    );
   });
 
   it('maps multiple path patterns', () => {

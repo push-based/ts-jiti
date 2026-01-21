@@ -40,7 +40,7 @@ export function loadTargetConfig(tsConfigPath: string) {
  * Read tsconfig file by path and return the parsed options as JSON object
  * @param tsconfigPath
  */
-export async function readTscByPath(
+export async function deriveTsConfig(
   tsconfigPath: string,
 ): Promise<CompilerOptions> {
   // check if tsconfig file exists
@@ -51,36 +51,4 @@ export async function readTscByPath(
 
   const { options } = loadTargetConfig(tsconfigPath);
   return options;
-}
-
-/**
- * Autoload tsconfig file from current working directory.
- * @param basenames Optional basenames to look for, e.g. ['lib', 'test', 'tools']
- * @returns First matching parsed tsconfig compiler options or empty object if no config file found
- */
-export async function autoloadTsc(
-  basenames?: string | string[],
-): Promise<CompilerOptions> {
-  const basenameArray = basenames
-    ? Array.isArray(basenames)
-      ? basenames
-      : [basenames]
-    : [];
-  const configFileName =
-    basenameArray.length > 0
-      ? `tsconfig.${basenameArray.join('.')}.json`
-      : 'tsconfig.json';
-
-  logger.debug(`Looking for default config file ${configFileName}`);
-
-  const exists = await fileExists(configFileName);
-
-  if (!exists) {
-    logger.warn(`No ${configFileName} file present in ${process.cwd()}`);
-    return {};
-  }
-
-  logger.debug(`Found default ts config file ${ansis.bold(configFileName)}`);
-
-  return readTscByPath(path.join(process.cwd(), configFileName));
 }
