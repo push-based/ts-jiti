@@ -1,4 +1,4 @@
-<h1 align="center">TS-Jiti</h1>
+<h1 align="center">Jiti TSC</h1>
 <h2 align="center">TypeScript Configuration Loader with Path Alias Support</h2>
 
 ---
