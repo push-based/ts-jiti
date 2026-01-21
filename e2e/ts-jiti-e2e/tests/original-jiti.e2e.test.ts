@@ -60,7 +60,7 @@ describe('Original jiti cli', () => {
   it('should execute cli over original jiti default', async () => {
     const { code, stdout } = await executeProcess({
       command: 'npx',
-      args: ['-y', 'jiti', path.join(TEST_OUTPUT_DIR, 'jiti', 'src', 'cli.ts')],
+      args: ['-y', 'jiti', path.join(TEST_OUTPUT_DIR, 'jiti', 'src', 'bin.ts-jiti.basic.ts')],
       cwd: envRoot,
     });
 
@@ -74,7 +74,7 @@ describe('Original jiti cli', () => {
       args: [
         '-y',
         'jiti',
-        path.join(TEST_OUTPUT_DIR, 'jiti', 'src', 'cli-import-path-alias.ts'),
+        path.join(TEST_OUTPUT_DIR, 'jiti', 'src', 'bin.ts-jiti.tsconfig-all.ts'),
       ],
       cwd: envRoot,
       ignoreExitCode: true,
@@ -84,20 +84,20 @@ describe('Original jiti cli', () => {
     expect(removeColorCodes(stderr)).toMatchInlineSnapshot(`
       "Error: Cannot find module '@utils/string'
       Require stack:
-      - /Users/michael_hladky/WebstormProjects/ts-jiti/tmp/e2e/ts-jiti-e2e/__test__/jiti/src/cli-import-path-alias.ts
+      - /Users/michael_hladky/WebstormProjects/ts-jiti/tmp/e2e/ts-jiti-e2e/__test__/jiti/src/bin.ts-jiti.tsconfig-all.ts
           at Module._resolveFilename (node:internal/modules/cjs/loader:1405:15)
           at require.resolve (node:internal/modules/helpers:145:19)
           at jitiResolve (/Users/michael_hladky/WebstormProjects/ts-jiti/tmp/e2e/ts-jiti-e2e/node_modules/jiti/dist/jiti.cjs:1:148703)
           at jitiRequire (/Users/michael_hladky/WebstormProjects/ts-jiti/tmp/e2e/ts-jiti-e2e/node_modules/jiti/dist/jiti.cjs:1:150290)
           at import (/Users/michael_hladky/WebstormProjects/ts-jiti/tmp/e2e/ts-jiti-e2e/node_modules/jiti/dist/jiti.cjs:1:158307)
-          at /Users/michael_hladky/WebstormProjects/ts-jiti/tmp/e2e/ts-jiti-e2e/__test__/jiti/src/cli-import-path-alias.ts:2:34
+          at /Users/michael_hladky/WebstormProjects/ts-jiti/tmp/e2e/ts-jiti-e2e/__test__/jiti/src/bin.ts-jiti.tsconfig-all.ts:2:34
           at eval_evalModule (/Users/michael_hladky/WebstormProjects/ts-jiti/tmp/e2e/ts-jiti-e2e/node_modules/jiti/dist/jiti.cjs:1:155533)
           at jitiRequire (/Users/michael_hladky/WebstormProjects/ts-jiti/tmp/e2e/ts-jiti-e2e/node_modules/jiti/dist/jiti.cjs:1:150967)
           at Function.import (/Users/michael_hladky/WebstormProjects/ts-jiti/tmp/e2e/ts-jiti-e2e/node_modules/jiti/dist/jiti.cjs:1:158307)
           at file:///Users/michael_hladky/WebstormProjects/ts-jiti/tmp/e2e/ts-jiti-e2e/node_modules/jiti/lib/jiti-cli.mjs:31:18 {
         code: 'MODULE_NOT_FOUND',
         requireStack: [
-          '/Users/michael_hladky/WebstormProjects/ts-jiti/tmp/e2e/ts-jiti-e2e/__test__/jiti/src/cli-import-path-alias.ts'
+          '/Users/michael_hladky/WebstormProjects/ts-jiti/tmp/e2e/ts-jiti-e2e/__test__/jiti/src/bin.ts-jiti.tsconfig-all.ts'
         ]
       }
       "
@@ -110,7 +110,7 @@ describe('Original jiti cli', () => {
       args: [
         '-y',
         'jiti',
-        path.join(TEST_OUTPUT_DIR, 'jiti', 'src', 'cli-import-path-alias.ts'),
+        path.join(TEST_OUTPUT_DIR, 'jiti', 'src', 'bin.ts-jiti.import.ts'),
       ],
       cwd: envRoot,
       ignoreExitCode: true,

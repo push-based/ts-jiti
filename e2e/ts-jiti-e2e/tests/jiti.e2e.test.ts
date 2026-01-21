@@ -37,7 +37,7 @@ describe('CLI jiti', () => {
       args: [
         '@push-based/ts-jiti',
         'jiti',
-        path.relative(envRoot, path.join(testFileDir, 'src', 'cli.ts')),
+        path.relative(envRoot, path.join(testFileDir, 'src', 'bin.jiti.basic.ts')),
       ],
       cwd: envRoot,
     });
@@ -55,7 +55,7 @@ describe('CLI jiti', () => {
         '@push-based/ts-jiti',
         'jiti',
         `--tsconfig=${relativeTsconfigPath}`,
-        path.relative(envRoot, path.join(testFileDir, 'src', 'cli-import-path-alias.ts')),
+        path.relative(envRoot, path.join(testFileDir, 'src', 'bin.jiti.alias.ts')),
       ],
       cwd: envRoot,
     });
@@ -73,7 +73,7 @@ describe('CLI jiti', () => {
         '@push-based/ts-jiti',
         'jiti',
         `--tsconfig=${relativeTsconfigPath}`,
-        path.relative(envRoot, path.join(testFileDir, 'src', 'cli-load-import.ts')),
+        path.relative(envRoot, path.join(testFileDir, 'src', 'bin.jiti.import.ts')),
         path.relative(envRoot, path.join(testFileDir, 'src', 'utils', 'string.ts')),
       ],
       cwd: envRoot,
