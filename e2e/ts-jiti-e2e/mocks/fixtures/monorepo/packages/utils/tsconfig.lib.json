@@ -1,9 +1,0 @@
-{
-  "extends": "./tsconfig.project.json",
-  "compilerOptions": {
-    "sourceMap": true
-  },
-  "files": [],
-  "include": [],
-  "exclude": []
-}

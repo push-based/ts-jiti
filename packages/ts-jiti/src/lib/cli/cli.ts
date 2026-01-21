@@ -39,5 +39,5 @@ export async function runCli(): Promise<void> {
     return;
   }
 
-  await jitiCommand(jitiOptions, positionalArgs);
+  await jitiCommand(jitiOptions, positionalArgs ?? []);
 }

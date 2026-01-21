@@ -1,4 +1,5 @@
 import type { Jiti } from 'jiti';
+import { osAgnosticPath } from '@push-based/test-utils';
 import { describe, expect, it, vi } from 'vitest';
 import { fileExists } from '../utils/file-system.js';
 import { createTsJiti, importModule, jitiOptionsFromTsConfig } from './jiti.js';
@@ -52,7 +53,7 @@ describe('createTsJiti', () => {
     expect(readTscByPath).toHaveBeenCalledWith('/test/tsconfig.json');
     expect(parseTsConfigToJitiConfig).toHaveBeenCalledWith({
       paths: { '@/*': ['./src/*'] },
-    });
+    }, '/test');
     expect(createJiti).toHaveBeenCalledWith('/test/file.js', {
       sourceMaps: false,
       alias: { '@': '/path/to/src' },
@@ -102,7 +103,7 @@ describe('jitiOptionsFromTsConfig', () => {
     const result = await jitiOptionsFromTsConfig('/test/tsconfig.json');
 
     expect(readTscByPath).toHaveBeenCalledWith('/test/tsconfig.json');
-    expect(parseTsConfigToJitiConfig).toHaveBeenCalledWith(mockCompilerOptions);
+    expect(parseTsConfigToJitiConfig).toHaveBeenCalledWith(mockCompilerOptions, '/test');
     expect(result).toBe(mockJitiOptions);
   });
 });
@@ -185,7 +186,7 @@ describe('importModule', () => {
       importModule({
         filepath: '/test/nonexistent.js',
       }),
-    ).rejects.toThrow("File '/test/nonexistent.js' does not exist");
+    ).rejects.toThrow(`File '${osAgnosticPath('/test/nonexistent.js')}' does not exist`);
 
     expect(fileExists).toHaveBeenCalledWith('/test/nonexistent.js');
   });

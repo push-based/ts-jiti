@@ -15,7 +15,7 @@ export function loadTargetConfig(tsConfigPath: string) {
 
   if (error) {
     throw new Error(
-      `Error reading TypeScript config file at ${tsConfigPath}:\n${error.messageText}`,
+      `Error reading TypeScript config file at ${tsConfigPath.replace(/\\/g, '/')}:\n${error.messageText}`,
     );
   }
 
@@ -46,7 +46,7 @@ export async function readTscByPath(
   // check if tsconfig file exists
   const exists = await fileExists(tsconfigPath);
   if (!exists) {
-    throw new Error(`Tsconfig file not found at path: ${tsconfigPath}`);
+    throw new Error(`Tsconfig file not found at path: ${tsconfigPath.replace(/\\/g, '/')}`);
   }
 
   const { options } = loadTargetConfig(tsconfigPath);

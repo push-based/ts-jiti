@@ -54,19 +54,28 @@ export type MappableJitiOptions = Partial<
 /**
  * Parse TypeScript compiler options to mappable jiti options
  * @param compilerOptions TypeScript compiler options
+ * @param tsconfigDir Directory of the tsconfig file (for resolving relative baseUrl)
  * @returns Mappable jiti options
  */
 export function parseTsConfigToJitiConfig(
   compilerOptions: CompilerOptions,
+  tsconfigDir?: string,
 ): MappableJitiOptions {
   const paths = compilerOptions.paths || {};
+  const baseUrl = compilerOptions.baseUrl
+    ? path.isAbsolute(compilerOptions.baseUrl)
+      ? compilerOptions.baseUrl
+      : tsconfigDir
+        ? path.resolve(tsconfigDir, compilerOptions.baseUrl)
+        : path.resolve(process.cwd(), compilerOptions.baseUrl)
+    : tsconfigDir || process.cwd();
 
   return {
     ...(Object.keys(paths).length > 0
       ? {
           alias: mapTsPathsToJitiAlias(
             paths,
-            compilerOptions.baseUrl || process.cwd(),
+            baseUrl,
           ),
         }
       : {}),

@@ -2,8 +2,8 @@ import { parseArgs } from 'node:util';
 import { z } from 'zod';
 import { stringifyError } from '../utils/errors.js';
 
-export const commandSchema = z.enum(['jiti', 'print-config', 'help']).meta({
-  describe: "The command to run (e.g., 'convert')",
+export const commandSchema = z.enum(['print-config', 'help']).meta({
+  describe: "The command to run (defaults to 'jiti')",
 });
 
 export const cliArgsSchema = z
@@ -59,14 +59,24 @@ export function parseCliArgs(argv = process.argv.slice(2)): CliArgs {
 
 export function parsePositionals(positionals: string[], isHelp: boolean) {
   try {
-    const [command, ...rest] =
-      isHelp || commandSchema.safeParse(positionals.at(0)).success
-        ? positionals
-        : ['jiti', ...positionals];
+    // Only check for explicit commands (print-config, help)
+    // Everything else defaults to jiti command
+    const firstArg = positionals.at(0);
+    const isExplicitCommand = isHelp || commandSchema.safeParse(firstArg).success;
+    
+    if (isExplicitCommand) {
+      const [command, ...rest] = positionals;
+      return {
+        command,
+        // For explicit commands, rest args are passed as positionalArgs
+        ...(rest.length > 0 ? { positionalArgs: rest } : {}),
+      };
+    }
+    
+    // Default to jiti command, all positionals are arguments to jiti
     return {
-      command,
-      // For jiti command, rest args are passed to jiti
-      ...(rest.length > 0 ? { positionalArgs: rest } : {}),
+      // command is optional for jiti (default)
+      ...(positionals.length > 0 ? { positionalArgs: positionals } : {}),
     };
   } catch (error) {
     throw new Error(

@@ -1,7 +1,0 @@
-{
-  "extends": "./tsconfig.project.json",
-  "compilerOptions": {
-    "esModuleInterop": true,
-    "jsx": 2
-  }
-}

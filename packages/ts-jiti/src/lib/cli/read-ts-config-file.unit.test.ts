@@ -1,4 +1,5 @@
 import type { CompilerOptions } from 'typescript';
+import { osAgnosticPath } from '@push-based/test-utils';
 import { describe, expect, vi } from 'vitest';
 import { parseTsConfigToJitiConfig } from '../jiti/jiti.schema.js';
 import { autoloadTsc, readTscByPath } from './read-ts-config-file.js';
@@ -15,9 +16,20 @@ vi.mock('../utils/file-system.js', async importOriginal => {
 
 vi.mock('../utils/logger.js', () => ({
   logger: {
-    task: vi.fn((message, fn) => fn()),
-    debug: vi.fn(),
+    error: vi.fn(),
     warn: vi.fn(),
+    info: vi.fn(),
+    debug: vi.fn(),
+    newline: vi.fn(),
+    group: vi.fn(async (_, worker) => {
+      const value = await worker();
+      return typeof value === 'object' ? value.result : undefined;
+    }),
+    task: vi.fn(async (message, fn) => {
+      const value = await fn();
+      return typeof value === 'object' ? value.result : undefined;
+    }),
+    command: vi.fn((_, worker) => worker()),
   },
 }));
 
@@ -88,7 +100,7 @@ describe('readTscByPath', () => {
     });
 
     await expect(readTscByPath('invalid.json')).rejects.toThrow(
-      'Error reading TypeScript config file at invalid.json:\nInvalid config',
+      `Error reading TypeScript config file at ${osAgnosticPath('invalid.json')}:\nInvalid config`,
     );
   });
 });

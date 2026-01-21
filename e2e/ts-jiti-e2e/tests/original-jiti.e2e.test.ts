@@ -3,79 +3,116 @@ import {
   E2E_ENVIRONMENTS_DIR,
   TEST_OUTPUT_DIR,
   removeColorCodes,
-  restoreNxIgnoredFiles,
-  teardownTestFolder,
+  fsFromJson,
 } from '@push-based/test-utils';
 import { executeProcess } from '@push-based/ts-jiti';
-import { cp } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { beforeAll, expect } from 'vitest';
+import { expect } from 'vitest';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const __filename = fileURLToPath(import.meta.url);
+const testFileName = path.basename(__filename);
+
+const toSlug = (str: string): string => {
+  return str.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+};
+
+const utilsContent = `
+export function to42(value?: unknown): number {
+  return 42;
+}
+export default to42;
+`;
+
+const binBasicContent = `#!/usr/bin/env node
+import { to42 } from './utils/string';
+
+console.log('Example: cli');
+console.log(\`Random number: \${to42()}\`);
+`;
+
+const binTsconfigAllContent = `#!/usr/bin/env node
+import { to42 } from '@utils/string';
+
+console.log('Example: cli');
+console.log(\`Random number: \${to42()}\`);
+`;
+
+const binImportContent = `#!/usr/bin/env node
+import { to42 } from '@utils/string';
+
+console.log('Example: cli-load-import');
+console.log(\`Random number: \${to42()}\`);
+`;
 
 describe('Original jiti cli', () => {
-  const jitiEnvVarsDefaults = () => ({
-    JITI_FS_CACHE: 'true',
-    JITI_CACHE: 'true',
-    JITI_REBUILD_FS_CACHE: 'false',
-    JITI_MODULE_CACHE: 'true',
-    JITI_REQUIRE_CACHE: 'true',
-    JITI_DEBUG: 'false',
-    JITI_SOURCE_MAPS: 'false',
-    JITI_INTEROP_DEFAULT: 'true',
-    JITI_EXTENSIONS: JSON.stringify([
-      '.js',
-      '.mjs',
-      '.cjs',
-      '.ts',
-      '.tsx',
-      '.mts',
-      '.cts',
-      '.mtsx',
-      '.ctsx',
-    ]),
-    JITI_ALIAS: JSON.stringify({}),
-    JITI_NATIVE_MODULES: JSON.stringify([]),
-    JITI_TRANSFORM_MODULES: JSON.stringify([]),
-    JITI_TRY_NATIVE: JSON.stringify('Bun' in globalThis),
-    JITI_JSX: 'false',
-  });
   const envRoot = path.join(E2E_ENVIRONMENTS_DIR, nxTargetProject());
-  const testFileDir = path.join(envRoot, TEST_OUTPUT_DIR, 'ts-jiti');
+  const describeName = 'Original jiti cli';
+  const describeSlug = toSlug(describeName);
 
-  beforeAll(async () => {
-    await cp(
-      path.join(__dirname, '..', 'mocks', 'fixtures', 'minimal-setup'),
-      testFileDir,
-      { recursive: true },
+  const getTestDir = (itName: string) => {
+    return path.join(
+      envRoot,
+      TEST_OUTPUT_DIR,
+      testFileName,
+      describeSlug,
+      toSlug(itName),
     );
-    await restoreNxIgnoredFiles(testFileDir);
-  });
-
-  afterAll(async () => {
-    await teardownTestFolder(testFileDir);
-  });
+  };
 
   it('should execute cli over original jiti default', async () => {
+    const testFileDir = getTestDir('should execute cli over original jiti default');
+    const cleanup = await fsFromJson({
+      [path.join(testFileDir, 'tsconfig.json')]: {
+        compilerOptions: {
+          baseUrl: '.',
+          paths: {
+            '@utils/*': ['./src/utils/*'],
+          },
+        },
+      },
+      [path.join(testFileDir, 'src', 'utils', 'string.ts')]: utilsContent,
+      [path.join(testFileDir, 'src', 'bin.ts-jiti.basic.ts')]: binBasicContent,
+    });
+
     const { code, stdout, stderr } = await executeProcess({
       command: 'npx',
-      args: ['-y', 'jiti', path.join(TEST_OUTPUT_DIR, 'ts-jiti', 'src', 'bin.ts-jiti.basic.ts')],
+      args: [
+        '-y',
+        'jiti',
+        path.relative(envRoot, path.join(testFileDir, 'src', 'bin.ts-jiti.basic.ts')),
+      ],
       cwd: envRoot,
       silent: true,
     });
 
     expect(code).toBe(0);
     expect(removeColorCodes(stdout) + removeColorCodes(stderr)).toContain('42');
+    
+    await cleanup();
   });
 
   it('should FAIL original jiti with code depending on path alias', async () => {
+    const testFileDir = getTestDir('should FAIL original jiti with code depending on path alias');
+    const cleanup = await fsFromJson({
+      [path.join(testFileDir, 'tsconfig.json')]: {
+        compilerOptions: {
+          baseUrl: '.',
+          paths: {
+            '@utils/*': ['./src/utils/*'],
+          },
+        },
+      },
+      [path.join(testFileDir, 'src', 'utils', 'string.ts')]: utilsContent,
+      [path.join(testFileDir, 'src', 'bin.ts-jiti.tsconfig-all.ts')]: binTsconfigAllContent,
+    });
+
     const { code, stderr } = await executeProcess({
       command: 'npx',
       args: [
         '-y',
         'jiti',
-        path.join(TEST_OUTPUT_DIR, 'ts-jiti', 'src', 'bin.ts-jiti.tsconfig-all.ts'),
+        path.relative(envRoot, path.join(testFileDir, 'src', 'bin.ts-jiti.tsconfig-all.ts')),
       ],
       cwd: envRoot,
       ignoreExitCode: true,
@@ -83,21 +120,37 @@ describe('Original jiti cli', () => {
 
     expect(code).not.toBe(0);
     expect(removeColorCodes(stderr)).toContain(`Error: Cannot find module '@utils/string'`);
+    
+    await cleanup();
   });
 
   it('should run original jiti with environment variables', async () => {
+    const testFileDir = getTestDir('should run original jiti with environment variables');
+    const cleanup = await fsFromJson({
+      [path.join(testFileDir, 'tsconfig.json')]: {
+        compilerOptions: {
+          baseUrl: '.',
+          paths: {
+            '@utils/*': ['./src/utils/*'],
+          },
+        },
+      },
+      [path.join(testFileDir, 'src', 'utils', 'string.ts')]: utilsContent,
+      [path.join(testFileDir, 'src', 'bin.ts-jiti.import.ts')]: binImportContent,
+    });
+
     const { code, stdout } = await executeProcess({
       command: 'npx',
       args: [
         '-y',
         'jiti',
-        path.join(TEST_OUTPUT_DIR, 'ts-jiti', 'src', 'bin.ts-jiti.import.ts'),
+        path.relative(envRoot, path.join(testFileDir, 'src', 'bin.ts-jiti.import.ts')),
       ],
       cwd: envRoot,
       ignoreExitCode: true,
       env: {
         JITI_ALIAS: JSON.stringify({
-          '@utils': path.join(envRoot, TEST_OUTPUT_DIR, 'ts-jiti', 'src', 'utils'),
+          '@utils': path.join(testFileDir, 'src', 'utils'),
         }),
       },
     });
@@ -106,5 +159,7 @@ describe('Original jiti cli', () => {
     // When original jiti fails with path aliases, it doesn't execute the bin file
     // so stdout should be empty
     expect(removeColorCodes(stdout)).toBe('');
+    
+    await cleanup();
   });
 });

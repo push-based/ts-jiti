@@ -1,4 +1,4 @@
-import { fromJson } from '@push-based/test-utils';
+import { fsFromJson } from '@push-based/test-utils';
 import { rm } from 'node:fs/promises';
 import path from 'node:path';
 import * as tsModule from 'typescript';
@@ -21,7 +21,7 @@ describe('loadTargetConfig', () => {
   );
 
   it('should return the parsed content of a tsconfig file and ist TypeScript helper to parse it', async () => {
-    const cleanup = await fromJson(
+    const cleanup = await fsFromJson(
       {
         'tsconfig.init.json': {
           compilerOptions: {
@@ -68,7 +68,7 @@ describe('loadTargetConfig', () => {
   });
 
   it('should return the parsed content of a tsconfig file that extends another config', async () => {
-    const cleanup = await fromJson(
+    const cleanup = await fsFromJson(
       {
         'tsconfig.extends-base.json': {
           compilerOptions: {
@@ -128,7 +128,7 @@ describe('readTscByPath', () => {
   });
 
   it('should load a valid tsconfig.json file', async () => {
-    const cleanup = await fromJson(
+    const cleanup = await fsFromJson(
       {
         'tsconfig.json': {
           compilerOptions: {

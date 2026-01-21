@@ -1,4 +1,5 @@
 import { type JitiOptions, createJiti as createJitiSource } from 'jiti';
+import path from 'node:path';
 import { fileExists } from '../utils/file-system.js';
 import {
   type MappableJitiOptions,
@@ -33,7 +34,8 @@ export async function jitiOptionsFromTsConfig(
   tsconfigPath: string,
 ): Promise<MappableJitiOptions> {
   const compilerOptions = await readTscByPath(tsconfigPath);
-  return parseTsConfigToJitiConfig(compilerOptions);
+  const tsconfigDir = path.dirname(tsconfigPath);
+  return parseTsConfigToJitiConfig(compilerOptions, tsconfigDir);
 }
 
 /*
@@ -46,7 +48,7 @@ export async function importModule<T = unknown>(
 
   const exists = await fileExists(filepath);
   if (!exists) {
-    throw new Error(`File '${filepath}' does not exist`);
+    throw new Error(`File '${filepath.replace(/\\/g, '/')}' does not exist`);
   }
 
   const jitiInstance = await createTsJiti(filepath, {

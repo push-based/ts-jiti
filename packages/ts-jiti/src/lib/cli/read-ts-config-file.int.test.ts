@@ -1,4 +1,4 @@
-import { fromJson } from '@push-based/test-utils';
+import { fsFromJson } from '@push-based/test-utils';
 import { rm } from 'node:fs/promises';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -14,7 +14,7 @@ describe('readTscByPath', () => {
   });
 
   it('should load a valid tsconfig.json file', async () => {
-    const cleanup = await fromJson(
+    const cleanup = await fsFromJson(
       {
         'tsconfig.json': {
           compilerOptions: {
@@ -59,7 +59,7 @@ describe('readTscByPath', () => {
   });
 
   it('should load tsconfig with different basename', async () => {
-    const cleanup = await fromJson(
+    const cleanup = await fsFromJson(
       {
         'tsconfig.build.json': {
           compilerOptions: {
@@ -89,7 +89,7 @@ describe('readTscByPath', () => {
   });
 
   it('should handle tsconfig without paths', async () => {
-    const cleanup = await fromJson(
+    const cleanup = await fsFromJson(
       {
         'tsconfig.json': {
           compilerOptions: {

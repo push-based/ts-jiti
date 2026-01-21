@@ -1,4 +1,4 @@
-import { removeColorCodes } from '@push-based/test-utils';
+import { osAgnosticPath, removeColorCodes } from '@push-based/test-utils';
 import { describe, expect, vi } from 'vitest';
 import {
   autoloadTsc,
@@ -29,8 +29,20 @@ vi.mock('typescript', async () => {
 
 vi.mock('../utils/logger.js', () => ({
   logger: {
-    debug: vi.fn(),
+    error: vi.fn(),
     warn: vi.fn(),
+    info: vi.fn(),
+    debug: vi.fn(),
+    newline: vi.fn(),
+    group: vi.fn(async (_, worker) => {
+      const value = await worker();
+      return typeof value === 'object' ? value.result : undefined;
+    }),
+    task: vi.fn(async (_, worker) => {
+      const value = await worker();
+      return typeof value === 'object' ? value.result : undefined;
+    }),
+    command: vi.fn((_, worker) => worker()),
   },
 }));
 
@@ -73,7 +85,7 @@ describe('loadTargetConfig', () => {
     });
 
     expect(() => loadTargetConfig('missing.json')).toThrow(
-      'Error reading TypeScript config file at missing.json:\nFile not found',
+      `Error reading TypeScript config file at ${osAgnosticPath('missing.json')}:\nFile not found`,
     );
     expect(readConfigFile).toHaveBeenCalledWith(
       '/test/missing.json',
@@ -133,7 +145,7 @@ describe('readTscByPath', () => {
     fileExists.mockResolvedValueOnce(false);
 
     await expect(readTscByPath('missing.json')).rejects.toThrow(
-      'Tsconfig file not found at path: missing.json',
+      `Tsconfig file not found at path: ${osAgnosticPath('missing.json')}`,
     );
     expect(fileExists).toHaveBeenCalledWith('missing.json');
   });
