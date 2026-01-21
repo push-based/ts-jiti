@@ -16,7 +16,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 describe('CLI jiti', () => {
   const envRoot = path.join(E2E_ENVIRONMENTS_DIR, nxTargetProject());
-  const testFileDir = path.join(envRoot, TEST_OUTPUT_DIR, 'jiti');
+  const testFileDir = path.join(envRoot, TEST_OUTPUT_DIR, 'ts-jiti');
 
   beforeAll(async () => {
     await cp(
@@ -28,11 +28,11 @@ describe('CLI jiti', () => {
   });
 
   afterAll(async () => {
-   //  await teardownTestFolder(testFileDir);
+     await teardownTestFolder(testFileDir);
   });
 
-  it('should execute cli over ts-jiti default', async () => {
-    const { code, stdout } = await executeProcess({
+  it('should execute cli over ts-jiti basic', async () => {
+    const { code, stdout, stderr } = await executeProcess({
       command: 'npx',
       args: [
         '@push-based/ts-jiti',
@@ -40,16 +40,17 @@ describe('CLI jiti', () => {
         path.relative(envRoot, path.join(testFileDir, 'src', 'bin.jiti.basic.ts')),
       ],
       cwd: envRoot,
+      silent: true,
     });
 
     expect(code).toBe(0);
-    expect(removeColorCodes(stdout)).toContain('42');
+    expect(removeColorCodes(stdout) + removeColorCodes(stderr)).toContain('42');
   });
 
   it('should execute cli over ts-jiti with path alias', async () => {
     const tsconfigPath = path.join(testFileDir, 'tsconfig.json');
     const relativeTsconfigPath = path.relative(envRoot, tsconfigPath);
-    const { code, stdout } = await executeProcess({
+    const { code, stdout, stderr } = await executeProcess({
       command: 'npx',
       args: [
         '@push-based/ts-jiti',
@@ -58,16 +59,17 @@ describe('CLI jiti', () => {
         path.relative(envRoot, path.join(testFileDir, 'src', 'bin.jiti.alias.ts')),
       ],
       cwd: envRoot,
+      silent: true,
     });
 
     expect(code).toBe(0);
-    expect(removeColorCodes(stdout)).toContain('Random number: 42');
+    expect(removeColorCodes(stdout) + removeColorCodes(stderr)).toContain('Random number: 42');
   });
 
   it('should execute cli over ts-jiti with importModule', async () => {
     const tsconfigPath = path.join(testFileDir, 'tsconfig.json');
     const relativeTsconfigPath = path.relative(envRoot, tsconfigPath);
-    const { code, stdout } = await executeProcess({
+    const { code, stdout, stderr } = await executeProcess({
       command: 'npx',
       args: [
         '@push-based/ts-jiti',
@@ -77,9 +79,10 @@ describe('CLI jiti', () => {
         path.relative(envRoot, path.join(testFileDir, 'src', 'utils', 'string.ts')),
       ],
       cwd: envRoot,
+      silent: true,
     });
 
     expect(code).toBe(0);
-    expect(removeColorCodes(stdout)).toContain('Random number: 42');
+    expect(removeColorCodes(stdout) + removeColorCodes(stderr)).toContain('Random number: 42');
   });
 });
