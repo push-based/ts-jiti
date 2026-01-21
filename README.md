@@ -9,7 +9,7 @@
 
 ## Overview
 
-[jiti](https://github.com/unjs/jiti) does not support TypeScript config files. **ts-jiti** bridges this gap by converting `tsconfig.json` paths into jiti-compatible options for better developer experience in monorepo environments.
+[jiti](https://github.com/unjs/jiti) does not support TypeScript config files. **jiti-tsc** bridges this gap by converting `tsconfig.json` paths into jiti-compatible options for better developer experience in monorepo environments.
 
 ## Packages
 
