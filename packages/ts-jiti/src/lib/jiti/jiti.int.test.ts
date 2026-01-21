@@ -6,7 +6,7 @@ import { nxTargetProject } from '@push-based/test-nx-utils';
 import type { TsConfigJson } from 'type-fest';
 import {createJiti} from "jiti";
 
-interface Plugin {
+type Plugin = {
   slug: string;
   runner: () => { result: number };
 }
@@ -65,7 +65,6 @@ describe('jiti', () => {
     });
 
     const absolutePath = path.resolve(testFile);
-    const utilsAbsolutePath = path.resolve(utilsFile);
     const utilsDir = path.resolve(baseFolder, 'utils');
     const j = createJiti(absolutePath, {
       alias: {
@@ -221,36 +220,44 @@ describe('importModule', () => {
     const ext = plugin.ext ?? 'mjs';
     const isCjs = ext === 'cjs';
 
+    const pluginPath = path.join(base, `plugin.${ext}`);
+    const basePath = tsconfigBase ? path.join(base, 'tsconfig.base.json') : undefined;
+    const configPath = tsconfig ? path.join(base, 'tsconfig.json') : undefined;
+
+    const utilFiles = plugin.utilImport
+      ? (() => {
+          const [, alias, rest] =
+            plugin.utilImport.match(/^@([^/]+)\/(.+)$/) ?? [];
+          const utilPath = path.join(
+            base,
+            alias ?? '',
+            `${(rest ?? plugin.utilImport.replace(/^@[^/]+\//, '')).replace(/\/$/, '')}.ts`
+          );
+          return { [utilPath]: utilsContent };
+        })()
+      : {};
+
+    const tsconfigFiles = {
+      ...(basePath && { [basePath]: tsconfigBase }),
+      ...(configPath && {
+        [configPath]: basePath
+          ? { ...tsconfig, extends: './tsconfig.base.json' }
+          : tsconfig,
+      }),
+    };
+
     const files: Record<string, unknown> = {
-      [path.join(base, `plugin.${ext}`)]: pluginContent(
+      [pluginPath]: pluginContent(
         slug,
         isCjs,
         plugin.utilImport
-      )
+      ),
+      ...utilFiles,
+      ...tsconfigFiles,
     };
 
-    if (plugin.utilImport) {
-      const [, alias, rest] =
-        plugin.utilImport.match(/^@([^/]+)\/(.+)$/) ?? [];
-      const utilPath = path.join(
-        base,
-        alias ?? '',
-        `${(rest ?? plugin.utilImport.replace(/^@[^/]+\//, '')).replace(/\/$/, '')}.ts`
-      );
-      files[utilPath] = utilsContent;
-    }
-
-    const tsconfigBasePath = tsconfigBase
-      ? (files[path.join(base, 'tsconfig.base.json')] = tsconfigBase,
-        path.join(base, 'tsconfig.base.json'))
-      : undefined;
-
-    const tsconfigPath = tsconfig
-      ? (files[path.join(base, 'tsconfig.json')] = tsconfigBasePath
-          ? { ...tsconfig, extends: './tsconfig.base.json' }
-          : tsconfig,
-        path.join(base, 'tsconfig.json'))
-      : undefined;
+    const tsconfigBasePath = basePath;
+    const tsconfigPath = configPath;
 
     const cleanup = await fsFromJson(files);
     setupRegistry.add(cleanup);
@@ -264,11 +271,11 @@ describe('importModule', () => {
   }
 
   beforeAll(async () => {
-    await Promise.all(Array.from(setupRegistry).map(cleanup => cleanup()));
+    await Promise.all([...setupRegistry].map(cleanup => cleanup()));
   });
 
   afterEach(async () => {
-    await Promise.all(Array.from(setupRegistry).map(cleanup => cleanup()));
+    await Promise.all([...setupRegistry].map(cleanup => cleanup()));
   });
 
   it.each([

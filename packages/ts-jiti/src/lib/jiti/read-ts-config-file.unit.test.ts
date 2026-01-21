@@ -1,7 +1,6 @@
-import { osAgnosticPath, removeColorCodes } from '@push-based/test-utils';
+import { osAgnosticPath } from '@push-based/test-utils';
 import { describe, expect, vi } from 'vitest';
 import {
-  autoloadTsc,
   loadTargetConfig,
   deriveTsConfig,
 } from './read-ts-config-file.js';

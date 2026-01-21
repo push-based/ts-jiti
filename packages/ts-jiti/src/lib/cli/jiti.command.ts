@@ -9,25 +9,12 @@ import { logger } from '../utils/logger.js';
  * @returns Environment variables object
  */
 function jitiOptionsToEnv(options: JitiOptions): Record<string, string> {
-  const env: Record<string, string> = {};
-  
-  if (options.alias) {
-    env['JITI_ALIAS'] = JSON.stringify(options.alias);
-  }
-  
-  if (options.interopDefault !== undefined) {
-    env['JITI_INTEROP_DEFAULT'] = options.interopDefault ? '1' : '0';
-  }
-  
-  if (options.sourceMaps !== undefined) {
-    env['JITI_SOURCE_MAPS'] = options.sourceMaps ? '1' : '0';
-  }
-  
-  if (options.jsx !== undefined) {
-    env['JITI_JSX'] = options.jsx ? '1' : '0';
-  }
-  
-  return env;
+  return {
+    ...(options.alias && { JITI_ALIAS: JSON.stringify(options.alias) }),
+    ...(options.interopDefault !== undefined && { JITI_INTEROP_DEFAULT: options.interopDefault ? '1' : '0' }),
+    ...(options.sourceMaps !== undefined && { JITI_SOURCE_MAPS: options.sourceMaps ? '1' : '0' }),
+    ...(options.jsx !== undefined && { JITI_JSX: options.jsx ? '1' : '0' }),
+  };
 }
 
 function filterJitiEnvVars(env: Record<string, string>): Record<string, string> {

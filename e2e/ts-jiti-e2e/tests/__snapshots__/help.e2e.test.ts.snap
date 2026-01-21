@@ -10,25 +10,24 @@ Commands:
   help                         Print help
 
 Options:
-  --tsconfig <path>            Path to TypeScript configuration file
   --output <path>              Output path for print-config command (prints to stdout if not provided)
   -h, --help                   Display help information
 
 Environment Variables:
-  JITI_TS_CONFIG_PATH          Path to TypeScript configuration file (alternative to --tsconfig)
+  JITI_TS_CONFIG_PATH          Path to TypeScript configuration file
 
 Examples:
   # Run jiti with tsconfig options
   jiti-tsc jiti ./path/to/module.ts
 
   # Run jiti with custom tsconfig
-  jiti-tsc jiti --tsconfig=./tsconfig.json ./path/to/module.ts
+  JITI_TS_CONFIG_PATH=./tsconfig.json jiti-tsc jiti ./path/to/module.ts
 
   # Print resolved jiti configuration
-  jiti-tsc print-config --tsconfig=./tsconfig.json
+  JITI_TS_CONFIG_PATH=./tsconfig.json jiti-tsc print-config
 
   # Print configuration to file
-  jiti-tsc print-config --tsconfig=./tsconfig.json --output=./jiti-config.json
-
+  JITI_TS_CONFIG_PATH=./tsconfig.json jiti-tsc print-config --output=./jiti-config.json
+    
 "
 `;

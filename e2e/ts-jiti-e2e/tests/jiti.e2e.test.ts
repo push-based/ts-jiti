@@ -12,23 +12,20 @@ import { expect } from 'vitest';
 const __filename = fileURLToPath(import.meta.url);
 const testFileName = path.basename(__filename);
 
-const toSlug = (str: string): string => {
-  return str.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-};
+const toSlug = (str: string): string => str.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z\d-]/g, '');
+
 describe('CLI jiti', () => {
   const envRoot = path.join(E2E_ENVIRONMENTS_DIR, nxTargetProject());
   const describeName = 'CLI jiti';
   const describeSlug = toSlug(describeName);
 
-  const getTestDir = (itName: string) => {
-    return path.join(
+  const getTestDir = (itName: string) => path.join(
       envRoot,
       TEST_OUTPUT_DIR,
       testFileName,
       describeSlug,
       toSlug(itName),
     );
-  };
 
   it('should execute ts file with jiti-tsc', async () => {
     const baseFolder = getTestDir('exec-jiti-tsc');
@@ -68,6 +65,7 @@ console.log(\`Executed over jiti-tsc\`);
     })).resolves.toMatchObject({ code: 0, stdout: expect.stringContaining('load-ts') });
     await cleanup();
   });
+
   it('should exec .ts', async () => {
     const d = getTestDir('exec-ts');
     const cleanup = await fsFromJson({

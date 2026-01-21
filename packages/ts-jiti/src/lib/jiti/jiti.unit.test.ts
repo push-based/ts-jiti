@@ -1,5 +1,4 @@
 import type { Jiti } from 'jiti';
-import { osAgnosticPath } from '@push-based/test-utils';
 import { describe, expect, it, vi } from 'vitest';
 import { fileExists } from '../utils/file-system.js';
 import { createTsJiti, importModule, jitiOptionsFromTsConfig } from './jiti.js';
@@ -11,7 +10,7 @@ vi.mock('jiti', () => ({
 }));
 
 vi.mock('./read-ts-config-file.js', () => ({
-  readTscByPath: vi.fn(),
+  deriveTsConfig: vi.fn(),
 }));
 
 vi.mock('./jiti.schema.js', () => ({
@@ -209,7 +208,7 @@ describe('importModule', () => {
       importModule({
         filepath: '/test/nonexistent.js',
       }),
-    ).rejects.toThrow(`File '${osAgnosticPath('/test/nonexistent.js')}' does not exist`);
+    ).rejects.toThrow(`File '/test/nonexistent.js' does not exist`);
 
     expect(fileExists).toHaveBeenCalledWith('/test/nonexistent.js');
   });

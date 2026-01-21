@@ -235,7 +235,7 @@ describe('parseTsConfigToJitiConfig', () => {
     });
   });
 
-  it('handles paths with multiple mappings by using first one', () => {
+  it('throws error when paths have multiple mappings (overloads)', () => {
     const compilerOptions = {
       paths: {
         '@/*': ['./src/*', './lib/*'],
@@ -243,13 +243,9 @@ describe('parseTsConfigToJitiConfig', () => {
       baseUrl: '/base',
     } as CompilerOptions;
 
-    const result = parseTsConfigToJitiConfig(compilerOptions);
-
-    expect(result).toStrictEqual({
-      alias: {
-        '@': '/base/src',
-      },
-    });
+    expect(() => parseTsConfigToJitiConfig(compilerOptions)).toThrow(
+      "TypeScript path overloads are not supported by jiti. Path pattern '@/*' has 2 mappings: ./src/*, ./lib/*. Jiti only supports a single alias mapping per pattern.",
+    );
   });
 
   it('ignores invalid path mappings', () => {

@@ -1,4 +1,3 @@
-import ansis from 'ansis';
 import path from 'node:path';
 import {
   type CompilerOptions,
@@ -7,7 +6,6 @@ import {
   sys,
 } from 'typescript';
 import { fileExists } from '../utils/file-system.js';
-import { logger } from '../utils/logger.js';
 
 export function loadTargetConfig(tsConfigPath: string) {
   const resolvedConfigPath = path.resolve(tsConfigPath);
