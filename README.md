@@ -1,5 +1,5 @@
 <h1 align="center">Jiti TSC</h1>
-<h2 align="center">TypeScript Configuration Loader with Path Alias Support</h2>
+<h2 align="center">[Jiti](https://github.com/unjs/jiti) that Supports TypeScript Configuration</h2>
 
 ---
 
