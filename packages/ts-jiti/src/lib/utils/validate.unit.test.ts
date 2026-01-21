@@ -167,12 +167,12 @@ describe('SchemaValidationError', () => {
 
   it('should include relative file path if provided', () => {
     const schema = z.object({}).meta({ title: 'CoreConfig' });
-    const filePath = path.join(process.cwd(), 'ts-jiti.config.ts');
+    const filePath = path.join(process.cwd(), 'jiti-tsc.config.ts');
 
     expect(
       new SchemaValidationError(new ZodError([]), schema, { filePath }).message,
     ).toContain(
-      `Invalid ${ansis.bold('CoreConfig')} in ${ansis.bold('ts-jiti.config.ts')} file\n`,
+      `Invalid ${ansis.bold('CoreConfig')} in ${ansis.bold('jiti-tsc.config.ts')} file\n`,
     );
   });
 });

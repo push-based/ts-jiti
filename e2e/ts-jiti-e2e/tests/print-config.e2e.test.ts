@@ -5,7 +5,7 @@ import {
   removeColorCodes,
   fsFromJson,
 } from '@push-based/test-utils';
-import { executeProcess, tsconfig } from '@push-based/ts-jiti';
+import { executeProcess, tsconfig } from '@push-based/jiti-tsc';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { expect } from 'vitest';
@@ -74,7 +74,7 @@ describe('CLI print-config', () => {
     const { code, stdout } = await executeProcess({
       command: 'npx',
       args: [
-        '@push-based/ts-jiti',
+        '@push-based/jiti-tsc',
         'print-config',
         `--tsconfig=${configFilePath(baseFolder)}`,
       ],
@@ -97,7 +97,7 @@ describe('CLI print-config', () => {
       sourceMaps: true,
       jsx: true,
     });
-    
+
     await cleanup();
   });
 });

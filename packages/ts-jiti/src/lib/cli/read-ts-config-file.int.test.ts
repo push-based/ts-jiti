@@ -4,7 +4,7 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { readTscByPath } from './read-ts-config-file.js';
 
-const TEST_OUTPUT_BASE = 'packages/ts-jiti/tmp';
+const TEST_OUTPUT_BASE = 'packages/jiti-tsc/tmp';
 
 describe('readTscByPath', () => {
   const testDir = path.join(TEST_OUTPUT_BASE, 'cli-read-tsc-by-path');

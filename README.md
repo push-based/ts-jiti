@@ -20,7 +20,7 @@
 ### Installation
 
 ```bash
-npm install @push-based/ts-jiti
+npm install @push-based/jiti-tsc
 ```
 
 ### Usage

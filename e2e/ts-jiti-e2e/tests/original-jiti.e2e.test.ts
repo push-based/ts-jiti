@@ -5,7 +5,7 @@ import {
   removeColorCodes,
   fsFromJson,
 } from '@push-based/test-utils';
-import { executeProcess } from '@push-based/ts-jiti';
+import { executeProcess } from '@push-based/jiti-tsc';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { expect } from 'vitest';
@@ -72,7 +72,7 @@ describe('Original jiti cli', () => {
         },
       },
       [path.join(testFileDir, 'src', 'utils', 'string.ts')]: utilsContent,
-      [path.join(testFileDir, 'src', 'bin.ts-jiti.basic.ts')]: binBasicContent,
+      [path.join(testFileDir, 'src', 'bin.jiti-tsc.basic.ts')]: binBasicContent,
     });
 
     const { code, stdout, stderr } = await executeProcess({
@@ -80,7 +80,7 @@ describe('Original jiti cli', () => {
       args: [
         '-y',
         'jiti',
-        path.relative(envRoot, path.join(testFileDir, 'src', 'bin.ts-jiti.basic.ts')),
+        path.relative(envRoot, path.join(testFileDir, 'src', 'bin.jiti-tsc.basic.ts')),
       ],
       cwd: envRoot,
       silent: true,
@@ -88,7 +88,7 @@ describe('Original jiti cli', () => {
 
     expect(code).toBe(0);
     expect(removeColorCodes(stdout) + removeColorCodes(stderr)).toContain('42');
-    
+
     await cleanup();
   });
 
@@ -104,7 +104,7 @@ describe('Original jiti cli', () => {
         },
       },
       [path.join(testFileDir, 'src', 'utils', 'string.ts')]: utilsContent,
-      [path.join(testFileDir, 'src', 'bin.ts-jiti.tsconfig-all.ts')]: binTsconfigAllContent,
+      [path.join(testFileDir, 'src', 'bin.jiti-tsc.tsconfig-all.ts')]: binTsconfigAllContent,
     });
 
     const { code, stderr } = await executeProcess({
@@ -112,7 +112,7 @@ describe('Original jiti cli', () => {
       args: [
         '-y',
         'jiti',
-        path.relative(envRoot, path.join(testFileDir, 'src', 'bin.ts-jiti.tsconfig-all.ts')),
+        path.relative(envRoot, path.join(testFileDir, 'src', 'bin.jiti-tsc.tsconfig-all.ts')),
       ],
       cwd: envRoot,
       ignoreExitCode: true,
@@ -120,7 +120,7 @@ describe('Original jiti cli', () => {
 
     expect(code).not.toBe(0);
     expect(removeColorCodes(stderr)).toContain(`Error: Cannot find module '@utils/string'`);
-    
+
     await cleanup();
   });
 
@@ -136,7 +136,7 @@ describe('Original jiti cli', () => {
         },
       },
       [path.join(testFileDir, 'src', 'utils', 'string.ts')]: utilsContent,
-      [path.join(testFileDir, 'src', 'bin.ts-jiti.import.ts')]: binImportContent,
+      [path.join(testFileDir, 'src', 'bin.jiti-tsc.import.ts')]: binImportContent,
     });
 
     const { code, stdout } = await executeProcess({
@@ -144,7 +144,7 @@ describe('Original jiti cli', () => {
       args: [
         '-y',
         'jiti',
-        path.relative(envRoot, path.join(testFileDir, 'src', 'bin.ts-jiti.import.ts')),
+        path.relative(envRoot, path.join(testFileDir, 'src', 'bin.jiti-tsc.import.ts')),
       ],
       cwd: envRoot,
       ignoreExitCode: true,
@@ -159,7 +159,7 @@ describe('Original jiti cli', () => {
     // When original jiti fails with path aliases, it doesn't execute the bin file
     // so stdout should be empty
     expect(removeColorCodes(stdout)).toBe('');
-    
+
     await cleanup();
   });
 });

@@ -1,5 +1,5 @@
 {
-  "name": "ts-jiti-e2e",
+  "name": "jiti-tsc-e2e",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "e2e/cli-e2e/src",
   "projectType": "application",
@@ -11,6 +11,6 @@
       }
     }
   },
-  "implicitDependencies": ["ts-jiti"],
+  "implicitDependencies": ["jiti-tsc"],
   "tags": ["scope:core", "scope:plugin", "type:e2e"]
 }

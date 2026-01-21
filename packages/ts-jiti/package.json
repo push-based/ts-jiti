@@ -1,12 +1,12 @@
 {
-  "name": "@push-based/ts-jiti",
+  "name": "@push-based/jiti-tsc",
   "version": "0.0.1",
   "private": false,
   "type": "module",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
   "bin": {
-    "ts-jiti": "./src/bin/bin.js"
+    "jiti-tsc": "./src/bin/bin.js"
   },
   "engines": {
     "node": ">=20.0.0"
@@ -17,8 +17,8 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/push-based/ts-jiti.git",
-    "directory": "tools/ts-jiti"
+    "url": "https://github.com/push-based/jiti-tsc.git",
+    "directory": "tools/jiti-tsc"
   },
   "keywords": [
     "typescript",

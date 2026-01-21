@@ -36,21 +36,21 @@ describe('jiti', () => {
   it('should use jiti.esmResolve to resolve module paths', async () => {
     const baseFolder = path.join(testFileDir(), 'jiti-esm-resolve');
     const testFile = path.join(baseFolder, 'test.mjs');
-    
+
     const cleanup = await fsFromJson({
       [testFile]: `export const value = 'esm-resolved';`
     });
-    
+
     const absolutePath = path.resolve(testFile);
     const j = createJiti(absolutePath);
     // jiti.esmResolve(id) is similar to import.meta.resolve(id)
     // Returns a file:// URL, so we need to convert it to a file path for comparison
     const resolvedPath = j.esmResolve('./test.mjs', baseFolder);
-    // Expected: file://<workspace>/tmp/int/ts-jiti/__test__/jiti-esm-resolve/test.mjs
+    // Expected: file://<workspace>/tmp/int/jiti-tsc/__test__/jiti-esm-resolve/test.mjs
     const expectedPath = `file://${path.resolve(baseFolder, 'test.mjs')}`;
 
     expect(resolvedPath).toBe(expectedPath);
-    
+
     await cleanup();
   });
 
@@ -58,12 +58,12 @@ describe('jiti', () => {
     const baseFolder = path.join(testFileDir(), 'jiti-esm-resolve-alias');
     const testFile = path.join(baseFolder, 'test.mjs');
     const utilsFile = path.join(baseFolder, 'utils', 'helper.mjs');
-    
+
     const cleanup = await fsFromJson({
       [testFile]: `export const value = 'esm-resolved-alias';`,
       [utilsFile]: `export const helper = 'helper-value';`
     });
-    
+
     const absolutePath = path.resolve(testFile);
     const utilsAbsolutePath = path.resolve(utilsFile);
     const utilsDir = path.resolve(baseFolder, 'utils');
@@ -76,11 +76,11 @@ describe('jiti', () => {
     // Returns a file:// URL, so we need to convert it to a file path for comparison
     // Test that alias resolution works with esmResolve
     const resolvedPath = j.esmResolve('@utils/helper.mjs', baseFolder);
-    // Expected: file://<workspace>/tmp/int/ts-jiti/__test__/jiti-esm-resolve-alias/utils/helper.mjs
+    // Expected: file://<workspace>/tmp/int/jiti-tsc/__test__/jiti-esm-resolve-alias/utils/helper.mjs
     const expectedPath = `file://${path.resolve(baseFolder, 'utils', 'helper.mjs')}`;
 
     expect(resolvedPath).toMatchPath(expectedPath);
-    
+
     await cleanup();
   });
 
@@ -88,18 +88,18 @@ describe('jiti', () => {
   it('should use jiti.import with default option', async () => {
     const baseFolder = path.join(testFileDir(), 'jiti-default-export');
     const testFile = path.join(baseFolder, 'test.mjs');
-    
+
     const cleanup = await fsFromJson({
       [testFile]: `const value = 'default-export'; export default value;`
     });
-    
+
     const absolutePath = path.resolve(testFile);
     const j = createJiti(absolutePath);
     // jiti.import(id, { default: true }) is shortcut to mod?.default ?? mod
     const modDefault = await j.import(absolutePath, { default: true });
-    
+
     expect(modDefault).toBe('default-export');
-    
+
     await cleanup();
   });
 
@@ -107,7 +107,7 @@ it('should use jiti.import with alias option single @utils', async () => {
   const baseFolder = path.join(testFileDir(), 'jiti-alias-single');
   const mainFile = path.join(baseFolder, 'main.mjs');
   const utilsFile = path.join(baseFolder, 'utils', 'helper.mjs');
-  
+
   const cleanup = await fsFromJson({
     [mainFile]: `
       import { helper } from '@utils/helper';
@@ -119,7 +119,7 @@ it('should use jiti.import with alias option single @utils', async () => {
       }
     `
   });
-  
+
   const absolutePath = path.resolve(mainFile);
   const utilsDir = path.resolve(path.dirname(utilsFile));
   const j = createJiti(absolutePath, {
@@ -127,10 +127,10 @@ it('should use jiti.import with alias option single @utils', async () => {
       '@utils': utilsDir
     }
   });
-  
+
   const mod = await j.import(absolutePath) as { result: string };
   expect(mod.result).toBe('helper-test');
-  
+
   await cleanup();
 });
 
@@ -138,7 +138,7 @@ it('should use jiti.import with alias option wildcard @utils/*', async () => {
   const baseFolder = path.join(testFileDir(), 'jiti-alias-wildcard');
   const mainFile = path.join(baseFolder, 'main.mjs');
   const utilsFile = path.join(baseFolder, 'utils', 'helper.mjs');
-  
+
   const cleanup = await fsFromJson({
     [mainFile]: `
       import { helper } from '@utils/helper';
@@ -150,7 +150,7 @@ it('should use jiti.import with alias option wildcard @utils/*', async () => {
       }
     `
   });
-  
+
   const absolutePath = path.resolve(mainFile);
   const utilsDir = path.resolve(path.dirname(utilsFile));
   const j = createJiti(absolutePath, {
@@ -158,10 +158,10 @@ it('should use jiti.import with alias option wildcard @utils/*', async () => {
       '@utils': utilsDir
     }
   });
-  
+
   const mod = await j.import(absolutePath) as { result: string };
   expect(mod.result).toBe('helper-test');
-  
+
   await cleanup();
 });
 
@@ -220,7 +220,7 @@ describe('importModule', () => {
     const slug = plugin.slug ?? testCase;
     const ext = plugin.ext ?? 'mjs';
     const isCjs = ext === 'cjs';
-  
+
     const files: Record<string, unknown> = {
       [path.join(base, `plugin.${ext}`)]: pluginContent(
         slug,
@@ -228,7 +228,7 @@ describe('importModule', () => {
         plugin.utilImport
       )
     };
-  
+
     if (plugin.utilImport) {
       const [, alias, rest] =
         plugin.utilImport.match(/^@([^/]+)\/(.+)$/) ?? [];
@@ -239,22 +239,22 @@ describe('importModule', () => {
       );
       files[utilPath] = utilsContent;
     }
-  
+
     const tsconfigBasePath = tsconfigBase
       ? (files[path.join(base, 'tsconfig.base.json')] = tsconfigBase,
         path.join(base, 'tsconfig.base.json'))
       : undefined;
-  
+
     const tsconfigPath = tsconfig
       ? (files[path.join(base, 'tsconfig.json')] = tsconfigBasePath
           ? { ...tsconfig, extends: './tsconfig.base.json' }
           : tsconfig,
         path.join(base, 'tsconfig.json'))
       : undefined;
-  
+
     const cleanup = await fsFromJson(files);
     setupRegistry.add(cleanup);
-  
+
     return {
       filepath: path.join(base, `plugin.${ext}`),
       ...(tsconfigPath ? { tsconfig: tsconfigPath } : {}),
@@ -280,7 +280,7 @@ describe('importModule', () => {
       case: slug,
       plugin: { slug, ext }
     });
-    
+
     const plugin = await importModule<Plugin>({filepath: path.resolve(filepath)});
 
     expect(plugin).toStrictEqual({ slug, runner: expect.any(Function) });

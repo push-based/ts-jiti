@@ -26,7 +26,7 @@ export const cliArgsSchema = z
   })
   .meta({
     describe:
-      'Zod schema for CLI arguments validation. Validates and transforms command line arguments for the ts-jiti tool. Supports both positional and named arguments with sensible defaults.',
+      'Zod schema for CLI arguments validation. Validates and transforms command line arguments for the jiti-tsc tool. Supports both positional and named arguments with sensible defaults.',
   });
 
 export type CliArgs = z.infer<typeof cliArgsSchema>;
@@ -63,7 +63,7 @@ export function parsePositionals(positionals: string[], isHelp: boolean) {
     // Everything else defaults to jiti command
     const firstArg = positionals.at(0);
     const isExplicitCommand = isHelp || commandSchema.safeParse(firstArg).success;
-    
+
     if (isExplicitCommand) {
       const [command, ...rest] = positionals;
       return {
@@ -72,7 +72,7 @@ export function parsePositionals(positionals: string[], isHelp: boolean) {
         ...(rest.length > 0 ? { positionalArgs: rest } : {}),
       };
     }
-    
+
     // Default to jiti command, all positionals are arguments to jiti
     return {
       // command is optional for jiti (default)

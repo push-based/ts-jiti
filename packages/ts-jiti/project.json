@@ -1,7 +1,7 @@
 {
-  "name": "ts-jiti",
+  "name": "jiti-tsc",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "tools/ts-jiti/src",
+  "sourceRoot": "tools/jiti-tsc/src",
   "projectType": "library",
   "tags": ["scope:core", "type:lib", "publishable"],
   "targets": {
@@ -46,7 +46,7 @@
     "demo": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "nx run @push-based/ts-jiti --inputFile=./tools/ts-jiti/demo/input-schema.ts --outputFile=./tools/ts-jiti/demo/output-schema.ts"
+        "command": "nx run @push-based/jiti-tsc --inputFile=./tools/jiti-tsc/demo/input-schema.ts --outputFile=./tools/jiti-tsc/demo/output-schema.ts"
       },
       "dependsOn": ["build"]
     }

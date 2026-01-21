@@ -5,7 +5,7 @@ import * as tsModule from 'typescript';
 import { describe, expect, it } from 'vitest';
 import { loadTargetConfig, deriveTsConfig } from './read-ts-config-file.js';
 
-const TEST_OUTPUT_BASE = 'packages/ts-jiti/tmp';
+const TEST_OUTPUT_BASE = 'packages/jiti-tsc/tmp';
 
 describe('loadTargetConfig', () => {
   const testDir = path.join(TEST_OUTPUT_BASE, 'load-target-config');

@@ -4,7 +4,7 @@ import {
   TEST_OUTPUT_DIR,
   fsFromJson,
 } from '@push-based/test-utils';
-import { executeProcess } from '@push-based/ts-jiti';
+import { executeProcess } from '@push-based/jiti-tsc';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { expect } from 'vitest';
@@ -30,18 +30,18 @@ describe('CLI jiti', () => {
     );
   };
 
-  it('should execute ts file with ts-jiti', async () => {
-    const baseFolder = getTestDir('exec-ts-jiti');
+  it('should execute ts file with jiti-tsc', async () => {
+    const baseFolder = getTestDir('exec-jiti-tsc');
     const cleanup = await fsFromJson({
       [path.join(baseFolder, 'bin.ts')]: `#!/usr/bin/env node
-console.log(\`Executed over ts-jiti\`);
-`,  
+console.log(\`Executed over jiti-tsc\`);
+`,
     });
 
     const { code, stdout } = await executeProcess({
       command: 'npx',
       args: [
-        '@push-based/ts-jiti',
+        '@push-based/jiti-tsc',
         path.relative(envRoot, path.join(baseFolder, 'bin.ts')),
       ],
       cwd: envRoot,
@@ -49,8 +49,8 @@ console.log(\`Executed over ts-jiti\`);
     });
 
     expect(code).toBe(0);
-    expect(stdout).toContain('Executed over ts-jiti');
-    
+    expect(stdout).toContain('Executed over jiti-tsc');
+
     await cleanup();
   });
 
@@ -62,7 +62,7 @@ console.log(\`Executed over ts-jiti\`);
     });
     await expect(executeProcess({
       command: 'npx',
-      args: ['@push-based/ts-jiti', path.relative(envRoot, path.join(d, 'a.js'))],
+      args: ['@push-based/jiti-tsc', path.relative(envRoot, path.join(d, 'a.js'))],
       cwd: envRoot,
       silent: true,
     })).resolves.toMatchObject({ code: 0, stdout: expect.stringContaining('load-ts') });
@@ -75,7 +75,7 @@ console.log(\`Executed over ts-jiti\`);
     });
     await expect(executeProcess({
       command: 'npx',
-      args: ['@push-based/ts-jiti', path.relative(envRoot, path.join(d, 'a.ts'))],
+      args: ['@push-based/jiti-tsc', path.relative(envRoot, path.join(d, 'a.ts'))],
       cwd: envRoot,
       silent: true,
     })).resolves.toMatchObject({ code: 0, stdout: expect.stringContaining('exec-ts') });
@@ -90,7 +90,7 @@ console.log(\`Executed over ts-jiti\`);
     });
     await expect(executeProcess({
       command: 'npx',
-      args: ['@push-based/ts-jiti', path.relative(envRoot, path.join(d, 'a.ts'))],
+      args: ['@push-based/jiti-tsc', path.relative(envRoot, path.join(d, 'a.ts'))],
       cwd: envRoot,
       silent: true,
     })).resolves.toMatchObject({ code: 0, stdout: expect.stringContaining('exec-ts-load-ts') });
@@ -106,7 +106,7 @@ console.log(\`Executed over ts-jiti\`);
     });
     await expect(executeProcess({
       command: 'npx',
-      args: ['@push-based/ts-jiti', path.relative(envRoot, path.join(d, 'a.ts'))],
+      args: ['@push-based/jiti-tsc', path.relative(envRoot, path.join(d, 'a.ts'))],
       cwd: envRoot,
       env: { ...process.env, JITI_TS_CONFIG_PATH: path.relative(envRoot, path.join(d, 'tsconfig.json')) },
       silent: true,
@@ -124,7 +124,7 @@ console.log(\`Executed over ts-jiti\`);
     });
     await expect(executeProcess({
       command: 'npx',
-      args: ['@push-based/ts-jiti', path.relative(envRoot, path.join(d, 'a.ts'))],
+      args: ['@push-based/jiti-tsc', path.relative(envRoot, path.join(d, 'a.ts'))],
       cwd: envRoot,
       env: { ...process.env, JITI_TS_CONFIG_PATH: path.relative(envRoot, path.join(d, 'tsconfig.json')) },
       silent: true,

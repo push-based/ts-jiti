@@ -1,7 +1,7 @@
 import { logger } from '../utils/logger.js';
 
 export const HELP_PROMPT = `
-Usage: ts-jiti [command] [options]
+Usage: jiti-tsc [command] [options]
 
 Commands:
   jiti                         Run jiti with tsconfig-derived options (default command)
@@ -18,16 +18,16 @@ Environment Variables:
 
 Examples:
   # Run jiti with tsconfig options
-  ts-jiti jiti ./path/to/module.ts
+  jiti-tsc jiti ./path/to/module.ts
 
   # Run jiti with custom tsconfig
-  ts-jiti jiti --tsconfig=./tsconfig.json ./path/to/module.ts
+  jiti-tsc jiti --tsconfig=./tsconfig.json ./path/to/module.ts
 
   # Print resolved jiti configuration
-  ts-jiti print-config --tsconfig=./tsconfig.json
+  jiti-tsc print-config --tsconfig=./tsconfig.json
 
   # Print configuration to file
-  ts-jiti print-config --tsconfig=./tsconfig.json --output=./jiti-config.json
+  jiti-tsc print-config --tsconfig=./tsconfig.json --output=./jiti-config.json
     `;
 
 export function isHelpCommand(args: string[]): boolean {

@@ -1,3 +1,3 @@
 import { createIntTestConfig } from '../../testing/test-setup-config/src/index.js';
 
-export default createIntTestConfig('ts-jiti');
+export default createIntTestConfig('jiti-tsc');

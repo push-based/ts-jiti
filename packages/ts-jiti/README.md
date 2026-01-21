@@ -1,21 +1,15 @@
-# @push-based/ts-jiti
+# @push-based/jiti-tsc
 
-TypeScript path aliases don't work at runtime. **ts-jiti** bridges this gap by converting `tsconfig.json` paths into jiti-compatible aliases for perfect monorepo execution.
+TypeScript path aliases don't work at runtime. **jiti-tsc** bridges this gap by converting `tsconfig.json` paths into jiti-compatible aliases for perfect monorepo execution.
 
 ## Features
 
-- ✅ Loads and parses TypeScript configuration files (`tsconfig.json`)
-- ✅ Converts TypeScript path aliases to jiti-compatible alias options
-- ✅ CLI tool with commands for configuration processing and jiti execution
-- ✅ TypeScript API for programmatic module importing with tsconfig support
-- ✅ Supports TypeScript path aliases in monorepo environments
-- ✅ Environment variable support for tsconfig path configuration
-- ✅ Print-config command for debugging resolved jiti options
+This library does one simple thing: it converts TypeScript path aliases to jiti-compatible alias options and wrapd the original jiti API to make it easier to use in monorepo environments.
 
 ## Installation
 
 ```bash
-npm install @push-based/ts-jiti
+npm install @push-based/jiti-tsc
 ```
 
 ## Quick Start
@@ -24,20 +18,23 @@ npm install @push-based/ts-jiti
 
 ```bash
 # Print resolved jiti configuration from tsconfig.json
-npx ts-jiti print-config --tsconfig=./tsconfig.json
+npx jiti-tsc print-config --tsconfig=./tsconfig.json
 
-# Print resolved jiti options from termonal args as well as onfiguration from tsconfig.json
-npx ts-jiti print-config --tsconfig=./tsconfig.json --
+# Print resolved jiti options from terminal args as well as configuration from tsconfig.json
+npx jiti-tsc print-config --tsconfig=./tsconfig.json
 
 
 # Print configuration to a file
-npx ts-jiti print-config --tsconfig=./tsconfig.json --output=./resolved-config.json
+npx jiti-tsc print-config --tsconfig=./tsconfig.json --output=./resolved-config.json
 
-# Run jiti with tsconfig-derived options
-npx ts-jiti jiti ./path/to/module.ts
+# Run jiti with tsconfig-derived options (via environment variable)
+JITI_TS_CONFIG_PATH=./tsconfig.json npx jiti-tsc jiti ./path/to/module.ts
+
+# Run jiti without tsconfig (uses default resolution)
+npx jiti-tsc jiti ./path/to/module.ts
 
 # Display help information
-npx ts-jiti help
+npx jiti-tsc help
 ```
 
 ## CLI Commands
@@ -48,25 +45,27 @@ Loads a TypeScript configuration file and prints the resolved jiti options.
 
 ```bash
 # Print to stdout
-npx ts-jiti print-config --tsconfig=./tsconfig.json
+npx jiti-tsc print-config --tsconfig=./tsconfig.json
 
 # Print to file
-npx ts-jiti print-config --tsconfig=./tsconfig.json --output=./resolved-config.json
+npx jiti-tsc print-config --tsconfig=./tsconfig.json --output=./resolved-config.json
 
 # Use environment variable for tsconfig path
-JITI_TS_CONFIG_PATH=./tsconfig.json npx ts-jiti print-config
+JITI_TS_CONFIG_PATH=./tsconfig.json npx jiti-tsc print-config
 ```
 
 ### `jiti`
 
 Runs the jiti command line tool with options derived from a TypeScript configuration file.
 
-```bash
-# Run jiti with tsconfig options
-npx ts-jiti jiti --tsconfig=./tsconfig.json ./path/to/module.ts
+**Note:** The `--tsconfig` argument is not passed to the jiti command. Use the `JITI_TS_CONFIG_PATH` environment variable to specify the tsconfig path.
 
-# Use environment variable for tsconfig path
-JITI_TS_CONFIG_PATH=./tsconfig.json npx ts-jiti jiti ./path/to/module.ts
+```bash
+# Run jiti with tsconfig options (tsconfig path via environment variable)
+JITI_TS_CONFIG_PATH=./tsconfig.json npx jiti-tsc jiti ./path/to/module.ts
+
+# Run jiti without tsconfig (uses default resolution)
+npx jiti-tsc jiti ./path/to/module.ts
 ```
 
 ### `help`
@@ -74,34 +73,37 @@ JITI_TS_CONFIG_PATH=./tsconfig.json npx ts-jiti jiti ./path/to/module.ts
 Displays help information.
 
 ```bash
-npx ts-jiti help
-npx ts-jiti --help
-npx ts-jiti -h
+npx jiti-tsc help
+npx jiti-tsc --help
+npx jiti-tsc -h
 ```
 
 ## CLI Options
 
 | Option              | Type      | Description                                                               |
 | ------------------- | --------- | ------------------------------------------------------------------------- |
-| `--tsconfig <path>` | `string`  | Path to TypeScript configuration file to load                             |
+| `--tsconfig <path>` | `string`  | Path to TypeScript configuration file to load (for `print-config` command only) |
 | `--output <path>`   | `string`  | Output path for `print-config` command (prints to stdout if not provided) |
 | `-h, --help`        | `boolean` | Display help information                                                  |
 
 **Environment Variables:**
 
-- `JITI_TS_CONFIG_PATH` — Path to TypeScript configuration file (alternative to `--tsconfig`)
+- `JITI_TS_CONFIG_PATH` — Path to TypeScript configuration file. For the `jiti` command, this is the only way to specify tsconfig (the `--tsconfig` argument is filtered out and not passed to jiti). For `print-config`, this is an alternative to `--tsconfig`.
 
 **Positional Arguments:**
 
 ```bash
-npx ts-jiti [command] [options]
+npx jiti-tsc [command] [options]
 ```
 
 - `command` — Command to run: `jiti`, `print-config`, `help`
 
 ## TypeScript Configuration
 
-The tool works with your existing `tsconfig.json` files. Use the `--tsconfig` option to specify which TypeScript configuration to load:
+The tool works with your existing `tsconfig.json` files. 
+
+- For the `print-config` command: Use the `--tsconfig` option or `JITI_TS_CONFIG_PATH` environment variable to specify which TypeScript configuration to load.
+- For the `jiti` command: Use the `JITI_TS_CONFIG_PATH` environment variable only (the `--tsconfig` argument is filtered out and not passed to jiti).
 
 ```json
 // tsconfig.json
@@ -123,7 +125,7 @@ The tool will parse the `paths` configuration and convert them to jiti-compatibl
 Imports a TypeScript module using jiti with optional tsconfig support for path alias resolution.
 
 ```typescript
-import { importModule } from '@push-based/ts-jiti';
+import { importModule } from '@push-based/jiti-tsc';
 
 const module = await importModule({
   filepath: './config.ts',
@@ -174,7 +176,7 @@ This tool supports loading TypeScript configuration files with the following fea
 }
 
 // Import a TypeScript module with path alias resolution
-import { importModule } from '@push-based/ts-jiti';
+import { importModule } from '@push-based/jiti-tsc';
 
 const configModule = await importModule({
   filepath: './packages/my-app/src/config.ts',

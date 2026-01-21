@@ -14,7 +14,7 @@ const TEST_OUTPUT_BASE = path.join(
   process.cwd(),
   'tmp',
   'int-test',
-  'ts-jiti',
+  'jiti-tsc',
   '.prettier-test-output',
 );
 
