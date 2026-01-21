@@ -4,9 +4,11 @@ export const HELP_PROMPT = `
 Usage: jiti-tsc [command] [options]
 
 Commands:
-  jiti                         Run jiti with tsconfig-derived options (default command)
   print-config                 Print resolved jiti configuration from tsconfig
   help                         Print help
+
+  If no command is specified or the first argument is not a recognized command,
+  arguments are passed to jiti (default behavior).
 
 Options:
   --output <path>              Output path for print-config command (prints to stdout if not provided)
@@ -17,10 +19,10 @@ Environment Variables:
 
 Examples:
   # Run jiti with tsconfig options
-  jiti-tsc jiti ./path/to/module.ts
+  JITI_TS_CONFIG_PATH=./tsconfig.json jiti-tsc ./path/to/module.ts
 
-  # Run jiti with custom tsconfig
-  JITI_TS_CONFIG_PATH=./tsconfig.json jiti-tsc jiti ./path/to/module.ts
+  # Run jiti without tsconfig
+  jiti-tsc ./path/to/module.ts
 
   # Print resolved jiti configuration
   JITI_TS_CONFIG_PATH=./tsconfig.json jiti-tsc print-config

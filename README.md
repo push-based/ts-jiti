@@ -9,11 +9,11 @@
 
 ## Overview
 
-`ts-jiti` is a tool that loads and processes TypeScript configuration files using jiti, with special support for resolving TypeScript path aliases in monorepo environments. This bridges the gap between TypeScript's path mapping and jiti's module resolution.
+[jiti](https://github.com/unjs/jiti) does not support TypeScript config files. **ts-jiti** bridges this gap by converting `tsconfig.json` paths into jiti-compatible options for better developer experience in monorepo environments.
 
 ## Packages
 
-- **[`@push-based/ts-jiti`](./packages/ts-jiti)** - Core CLI tool for loading TypeScript configs with jiti
+- **[`@push-based/jiti-tsc`](./packages/jiti-tsc)** - CLI tool and programmatic API for using jiti with TypeScript configuration files
 
 ## Quick Start
 
@@ -26,18 +26,21 @@ npm install @push-based/jiti-tsc
 ### Usage
 
 ```bash
-# Load and print TypeScript configuration
-npx ts-jiti print-config --config=./ts-jiti.config.ts
+# Run jiti with tsconfig-derived options
+JITI_TS_CONFIG_PATH=./tsconfig.json npx jiti-tsc ./path/to/module.ts
+
+# Print resolved jiti configuration
+JITI_TS_CONFIG_PATH=./tsconfig.json npx jiti-tsc print-config
 ```
 
-This loads your TypeScript config and converts tsconfig paths to jiti-compatible aliases.
+This will use your TypeScript configuration to resolve path aliases and other compiler options when running jiti.
 
 ## Features
 
-- 🔒 **Type-safe config loading** - Load TypeScript configs with full type checking
-- 📦 **Path alias resolution** - Convert tsconfig paths to jiti aliases automatically
-- 🎯 **Monorepo support** - Resolve internal packages with TypeScript path mappings
-- 📝 **Jiti integration** - Built on top of jiti for reliable TypeScript module loading
+- 🔒 **Type-safe** - Full TypeScript support with path alias resolution
+- 📦 **Zero config** - Automatically detects `tsconfig.json` in the current directory
+- 🎯 **Monorepo support** - Resolves TypeScript path aliases at runtime
+- 📝 **CLI & API** - Both command-line tool and programmatic API available
 
 ## Contributing
 

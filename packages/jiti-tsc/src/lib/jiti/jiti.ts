@@ -33,9 +33,14 @@ export async function createTsJiti(
 export async function jitiOptionsFromTsConfig(
   tsconfigPath: string,
 ): Promise<MappableJitiOptions> {
-  const compilerOptions = await deriveTsConfig(tsconfigPath);
-  const tsconfigDir = path.dirname(tsconfigPath);
-  return parseTsConfigToJitiConfig(compilerOptions, tsconfigDir);
+  try {
+    const compilerOptions = await deriveTsConfig(tsconfigPath);
+    const tsconfigDir = path.dirname(tsconfigPath);
+    return parseTsConfigToJitiConfig(compilerOptions, tsconfigDir);
+  } catch (error) {
+    console.warn(`Failed to load tsconfig from ${tsconfigPath}:`, error);
+    return {};
+  }
 }
 
 /*

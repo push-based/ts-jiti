@@ -12,13 +12,12 @@
     "node": ">=20.0.0"
   },
   "scripts": {},
-  "description": "TypeScript library and CLI tool that loads TypeScript configuration files and converts them to jiti-compatible options, enabling proper module resolution with TypeScript path aliases in monorepo environments",
+  "description": "jiti that works with TypeScript config files",
   "author": "Michael Hladky",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/push-based/jiti-tsc.git",
-    "directory": "tools/jiti-tsc"
+    "url": "https://github.com/push-based/jiti-tsc.git"
   },
   "keywords": [
     "typescript",

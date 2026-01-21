@@ -72,9 +72,12 @@ describe('CLI print-config', () => {
       args: [
         '@push-based/jiti-tsc',
         'print-config',
-        `--tsconfig=${configFilePath(baseFolder)}`,
       ],
       cwd: envRoot,
+      env: {
+        ...process.env,
+        JITI_TS_CONFIG_PATH: configFilePath(baseFolder),
+      },
     });
 
     expect(code).toBe(0);
@@ -83,6 +86,60 @@ describe('CLI print-config', () => {
     expect(json).toStrictEqual({
       tsconfigPath: expect.pathToEndWith(
         `print-config.e2e.test.ts/${describeSlug}/${expectedSlug}/config/tsconfig.json`,
+      ),
+      alias: {
+        '@utils': expect.pathToEndWith(
+          `print-config.e2e.test.ts/${describeSlug}/${expectedSlug}/src/utils`,
+        ),
+      },
+      interopDefault: true,
+      sourceMaps: true,
+      jsx: true,
+    });
+
+    await cleanup();
+  });
+
+  it('should use default ./tsconfig.json when JITI_TS_CONFIG_PATH is not set', async () => {
+    const baseFolder = getTestDir('should use default ./tsconfig.json when JITI_TS_CONFIG_PATH is not set');
+    const cleanup = await fsFromJson({
+      [path.join(baseFolder, 'tsconfig.json')]: {
+        compilerOptions: {
+          baseUrl: '.',
+          paths: {
+            '@utils/*': ['./src/utils'],
+          },
+          esModuleInterop: true,
+          sourceMap: true,
+          jsx: 'preserve',
+        },
+      },
+      [path.join(baseFolder, 'src', 'utils', 'string.ts')]: `export function to42(): number {
+  return 42;
+}
+`,
+    });
+
+    const { code, stdout } = await executeProcess({
+      command: 'npx',
+      args: [
+        '@push-based/jiti-tsc',
+        'print-config',
+      ],
+      cwd: baseFolder,
+      env: {
+        ...Object.fromEntries(
+          Object.entries(process.env).filter(([key]) => key !== 'JITI_TS_CONFIG_PATH')
+        ),
+      },
+    });
+
+    expect(code).toBe(0);
+    const json = JSON.parse(removeColorCodes(stdout));
+    const expectedSlug = toSlug('should use default ./tsconfig.json when JITI_TS_CONFIG_PATH is not set');
+    expect(json).toStrictEqual({
+      tsconfigPath: expect.pathToEndWith(
+        `print-config.e2e.test.ts/${describeSlug}/${expectedSlug}/tsconfig.json`,
       ),
       alias: {
         '@utils': expect.pathToEndWith(
