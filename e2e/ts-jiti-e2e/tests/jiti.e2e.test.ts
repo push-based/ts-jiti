@@ -185,4 +185,31 @@ console.log(\`Executed over jiti-tsc\`);
     });
     await cleanup();
   });
+
+  it('should execute ts file with --import jiti-tsc', async () => {
+    const baseFolder = getTestDir('exec-jiti-tsc');
+    const cleanup = await fsFromJson({
+      [path.join(baseFolder, 'bin.ts')]: `#!/usr/bin/env node
+console.log(\`Executed over --import jiti-tsc\`);
+`,
+    });
+
+    const { code, stdout } = await executeProcess({
+      command: 'node',
+      args: [
+        path.relative(envRoot, path.join(baseFolder, 'bin.ts')),
+      ],
+      cwd: envRoot,
+      silent: true,
+      env: {
+        NODE_OPTIONS: "--import jiti-tsc"
+      }
+    });
+
+    expect(code).toBe(0);
+    expect(stdout).toContain('Executed over --import jiti-tsc');
+
+    await cleanup();
+  });
+
 });
