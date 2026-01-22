@@ -2,6 +2,7 @@ import path from 'node:path';
 import { describe, expect } from 'vitest';
 import { deriveTsConfig, loadTargetConfig } from './read-ts-config-file.js';
 
+
 const TEST_OUTPUT_BASE = 'tmp';
 
 describe('loadTargetConfig', () => {
@@ -19,9 +20,9 @@ describe('loadTargetConfig', () => {
 
     const configPath = path.join(testDirPath, 'tsconfig.json');
 
-    expect(() => loadTargetConfig(configPath))
-      .toThrow(`Error reading TypeScript config file at tmp/should-throw-no-files-match/tsconfig.json:
-Cannot read file '/Users/michael_hladky/WebstormProjects/ts-jiti/tmp/should-throw-no-files-match/tsconfig.json'.`);
+    expect(() => loadTargetConfig(configPath)).toThrow(
+      `Error reading TypeScript config file at`,
+    );
   });
 });
 
