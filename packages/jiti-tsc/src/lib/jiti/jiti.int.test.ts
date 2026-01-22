@@ -57,7 +57,7 @@ describe('jiti', () => {
     // Returns a file:// URL, so we need to convert it to a file path for comparison
     const resolvedPath = j.esmResolve('./test.mjs', baseFolder);
     // Expected: file://<workspace>/tmp/int/jiti-tsc/__test__/jiti-esm-resolve/test.mjs
-    const expectedPath = `file://${path.resolve(baseFolder, 'test.mjs')}`;
+    const expectedPath = `file:///${path.resolve(baseFolder, 'test.mjs').replace(/\\/g, '/')}`;
 
     expect(resolvedPath).toMatchPath(expectedPath);
 
