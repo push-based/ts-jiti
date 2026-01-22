@@ -2,7 +2,7 @@ name: PR Commitlint
 
 on:
   pull_request:
-    types: [ opened, synchronize, edited ]
+    types: [opened, synchronize, edited]
 
 jobs:
   check:

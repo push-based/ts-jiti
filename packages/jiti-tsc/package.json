@@ -44,7 +44,14 @@
   "publishConfig": {
     "access": "public"
   },
-  "dependencies": {},
+  "dependencies": {
+    "jiti": "^2.4.2",
+    "typescript": "5.7.3",
+    "ansis": "^3.3.2",
+    "zod": "^4.1.5",
+    "ora": "^9.0.0",
+    "tslib": "^2.6.2"
+  },
   "peerDependencies": {},
   "devDependencies": {
     "@types/json-schema": "^7.0.15",

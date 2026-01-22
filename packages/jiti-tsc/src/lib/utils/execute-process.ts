@@ -6,7 +6,6 @@ import {
   spawn,
 } from 'node:child_process';
 import type { Readable, Writable } from 'node:stream';
-import { logger } from './logger.js';
 
 /**
  * Represents the process result.
@@ -198,14 +197,14 @@ export function executeProcess(cfg: ProcessConfig): Promise<ProcessResult> {
         const result: ProcessResult = { bin, code, signal, stdout, stderr };
         if (code === 0 || ignoreExitCode) {
           if (!silent) {
-            logger.debug(output);
+            console.info(output);
           }
           onComplete?.();
           resolve(result);
         } else {
           if (!silent) {
             // ensure stdout and stderr are logged to help debug failure
-            logger.debug(output, { force: true });
+            console.info(output, { force: true });
           }
           const error = new ProcessError(result);
           onError?.(error);
@@ -214,5 +213,5 @@ export function executeProcess(cfg: ProcessConfig): Promise<ProcessResult> {
       });
     });
 
-  return silent ? worker() : logger.command(bin, worker);
+  return worker();
 }

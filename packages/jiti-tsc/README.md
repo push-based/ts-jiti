@@ -121,7 +121,7 @@ npx jiti-tsc -h
 ## CLI Options
 
 | Option            | Type      | Description                                                               |
-|-------------------|-----------|---------------------------------------------------------------------------|
+| ----------------- | --------- | ------------------------------------------------------------------------- |
 | `--output <path>` | `string`  | Output path for `print-config` command (prints to stdout if not provided) |
 | `-h, --help`      | `boolean` | Display help information                                                  |
 
@@ -176,7 +176,7 @@ const module = await importModule({
 Jiti supports several options that can be directly derived from the TypeScript configuration.
 
 | Jiti Option      | Jiti Type                | TypeScript Option | TypeScript Type            | Description                                                                                |
-|------------------|--------------------------|-------------------|----------------------------|--------------------------------------------------------------------------------------------|
+| ---------------- | ------------------------ | ----------------- | -------------------------- | ------------------------------------------------------------------------------------------ |
 | `alias`          | `Record<string, string>` | `paths`           | `Record<string, string[]>` | TypeScript `paths` are converted to jiti `alias` objects with absolute paths resolved. [*] |
 | `interopDefault` | `boolean`                | `esModuleInterop` | `boolean`                  | Maps `esModuleInterop` to enable default import interop in jiti.                           |
 | `sourceMaps`     | `boolean`                | `sourceMap`       | `boolean`                  | Maps `sourceMap` to enable sourcemap generation in jiti.                                   |

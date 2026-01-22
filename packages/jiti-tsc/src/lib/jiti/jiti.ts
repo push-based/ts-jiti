@@ -1,9 +1,11 @@
 import { type JitiOptions, createJiti as createJitiSource } from 'jiti';
 import path from 'node:path';
 import { fileExists } from '../utils/file-system.js';
-import { type MappableJitiOptions, parseTsConfigToJitiConfig } from './jiti.schema.js';
+import {
+  type MappableJitiOptions,
+  parseTsConfigToJitiConfig,
+} from './jiti.schema.js';
 import { deriveTsConfig } from './read-ts-config-file.js';
-
 
 /**
  * Create a jiti instance with options derived from tsconfig.

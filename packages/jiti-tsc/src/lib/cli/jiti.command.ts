@@ -1,10 +1,12 @@
 import type { JitiOptions } from 'jiti';
-import { JITI_TSCONFIG_PATH_ENV_VAR, JITI_VERBOSE_ENV_VAR } from '../jiti/constants.js';
+import {
+  JITI_TSCONFIG_PATH_ENV_VAR,
+  JITI_VERBOSE_ENV_VAR,
+} from '../jiti/constants.js';
 import { jitiOptionsFromTsConfig } from '../jiti/jiti.js';
 import { filterJitiEnvVars, jitiOptionsToEnv } from '../jiti/jiti.schema.js';
 import { formatCommandStatus } from '../utils/command.js';
 import { executeProcess } from '../utils/execute-process.js';
-
 
 /**
  * Small wrapper to run jiti command line with options derived from tsconfig.

@@ -2,7 +2,6 @@ import path from 'node:path';
 import { describe, expect } from 'vitest';
 import { deriveTsConfig, loadTargetConfig } from './read-ts-config-file.js';
 
-
 const TEST_OUTPUT_BASE = 'tmp';
 
 describe('loadTargetConfig', () => {
