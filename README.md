@@ -37,9 +37,6 @@ npx jiti-tsc ./path/to/module.ts
 
 # Run jiti with tsconfig-derived options
 JITI_TSCONFIG_PATH=./tsconfig.json npx jiti-tsc ./path/to/module.ts
-
-# Print resolved jiti configuration
-JITI_TSCONFIG_PATH=./tsconfig.json npx jiti-tsc print-config
 ```
 
 ## Contributing

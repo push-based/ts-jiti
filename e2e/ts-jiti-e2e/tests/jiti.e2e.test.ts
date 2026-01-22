@@ -7,7 +7,6 @@ import {
 } from '@push-based/test-utils';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-// JITI_TSCONFIG_PATH_ENV_VAR is 'JITI_TSCONFIG_PATH'
 import { expect } from 'vitest';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -33,59 +32,8 @@ describe('CLI jiti', () => {
       toSlug(itName),
     );
 
-  it('should execute ts file with --import jiti-tsc/register', async () => {
-    const baseFolder = getTestDir('exec-import-jiti-tsc');
-    const cleanup = await fsFromJson({
-      [path.join(baseFolder, 'package.json')]: { type: 'module' },
-      [path.join(baseFolder, 'bin.ts')]: `#!/usr/bin/env node
-console.log(\`Executed with --import jiti-tsc/register\`);
-`,
-    });
-
-    const { code, stdout } = await executeProcess({
-      command: 'node',
-      args: ['--import', '@push-based/jiti-tsc/register', 'bin.ts'],
-      cwd: baseFolder,
-    });
-
-    expect(code).toBe(0);
-    expect(stdout).toContain('Executed with --import jiti-tsc/register');
-
-    await cleanup();
-  });
-
-  it('should execute ts file with --import jiti-tsc/register and tsconfig paths', async () => {
-    const d = getTestDir('exec-import-jiti-tsc-tsconfig');
-    const cleanup = await fsFromJson({
-      [path.join(d, 'package.json')]: { type: 'module' },
-      [path.join(d, 'tsconfig.json')]: {
-        compilerOptions: { baseUrl: '.', paths: { '@/*': ['./*'] } },
-      },
-      [path.join(d, 'a.ts')]: `import { x } from '@/b.js'; console.log(x);`,
-      [path.join(d, 'b.ts')]:
-        `export const x = 'exec-import-jiti-tsc-tsconfig';`,
-    });
-    await expect(
-      executeProcess({
-        command: 'node',
-        args: ['--import', '@push-based/jiti-tsc/register', 'a.ts'],
-        cwd: d,
-        env: {
-          JITI_TSCONFIG_PATH: path.relative(
-            envRoot,
-            path.join(d, 'tsconfig.json'),
-          ),
-        },
-      }),
-    ).resolves.toMatchObject({
-      code: 0,
-      stdout: expect.stringContaining('exec-import-jiti-tsc-tsconfig'),
-    });
-    await cleanup();
-  });
-
-  it('should execute ts file with @push-based/jiti-tsc', async () => {
-    const baseFolder = getTestDir('exec-push-based-jiti-tsc');
+  it('should execute ts file with jiti-tsc', async () => {
+    const baseFolder = getTestDir('exec-jiti-tsc');
     const cleanup = await fsFromJson({
       [path.join(baseFolder, 'bin.ts')]: `#!/usr/bin/env node
 console.log(\`Executed over jiti-tsc\`);
@@ -105,66 +53,6 @@ console.log(\`Executed over jiti-tsc\`);
     expect(code).toBe(0);
     expect(stdout).toContain('Executed over jiti-tsc');
 
-    await cleanup();
-  });
-
-  it('should execute ts file with jiti-tsc', async () => {
-    const baseFolder = getTestDir('exec-jiti-tsc');
-    const cleanup = await fsFromJson({
-      [path.join(baseFolder, 'bin.ts')]: `#!/usr/bin/env node
-console.log(\`Executed over jiti-tsc\`);
-`,
-    });
-
-    const { code, stdout } = await executeProcess({
-      command: 'npx',
-      args: [
-        'jiti-tsc',
-        path.relative(envRoot, path.join(baseFolder, 'bin.ts')),
-      ],
-      cwd: envRoot,
-      silent: true,
-    });
-
-    expect(code).toBe(0);
-    expect(stdout).toContain('Executed over jiti-tsc');
-
-    await cleanup();
-  });
-
-  it('should execute cli.ts file with jiti-tsc and forward all options', async () => {
-    const d = getTestDir('exec-cli-jiti-tsc-forward-options');
-    const cleanup = await fsFromJson({
-      [path.join(d, 'cli.ts')]: `#!/usr/bin/env node
-import { parseArgs } from 'node:util';
-
-const { values } = parseArgs({
-  args: process.argv.slice(2),
-  options: {
-    foo: { type: 'string' },
-  },
-});
-
-console.log('Passed options:', values);
-console.log(\`--foo=\${values.foo}\`);
-`,
-    });
-    await expect(
-      executeProcess({
-        command: 'npx',
-        args: [
-          '@push-based/jiti-tsc',
-          path.relative(envRoot, path.join(d, 'cli.ts')),
-          '--foo',
-          'bar',
-        ],
-        cwd: envRoot,
-        silent: true,
-      }),
-    ).resolves.toMatchObject({
-      code: 0,
-      stdout: expect.stringContaining('--foo=bar'),
-    });
     await cleanup();
   });
 
@@ -255,10 +143,7 @@ console.log(\`--foo=\${values.foo}\`);
         cwd: envRoot,
         env: {
           ...process.env,
-          JITI_TSCONFIG_PATH: path.relative(
-            envRoot,
-            path.join(d, 'tsconfig.json'),
-          ),
+          JITI_TS_CONFIG_PATH: path.resolve(path.join(d, 'tsconfig.json')),
         },
         silent: true,
       }),
@@ -290,10 +175,7 @@ console.log(\`--foo=\${values.foo}\`);
         cwd: envRoot,
         env: {
           ...process.env,
-          JITI_TSCONFIG_PATH: path.relative(
-            envRoot,
-            path.join(d, 'tsconfig.json'),
-          ),
+          JITI_TS_CONFIG_PATH: path.resolve(path.join(d, 'tsconfig.json')),
         },
         silent: true,
       }),

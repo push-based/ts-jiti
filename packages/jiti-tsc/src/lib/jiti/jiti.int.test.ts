@@ -7,12 +7,8 @@ import {
 import { createJiti } from 'jiti';
 import path from 'node:path';
 import type { TsConfigJson } from 'type-fest';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { importModule, jitiOptionsFromTsConfig } from './jiti.js';
-
-vi.mock('./read-ts-config-file.js', () => ({
-  deriveTsConfig: vi.fn(),
-}));
 
 type Plugin = {
   slug: string;
@@ -181,8 +177,10 @@ describe('jitiOptionsFromTsConfig', () => {
   it('throws error when tsconfig has path overloads (multiple mappings)', async () => {
     const baseFolder = path.join(testFileDir(), 'tsconfig-path-overloads');
     const tsconfigFile = path.join(baseFolder, 'tsconfig.json');
+    const indexFile = path.join(baseFolder, 'index.ts');
 
     const cleanup = await fsFromJson({
+      [indexFile]: 'export const t = 42;',
       [tsconfigFile]: {
         compilerOptions: {
           baseUrl: '.',
@@ -190,12 +188,15 @@ describe('jitiOptionsFromTsConfig', () => {
             '@/*': ['./src/*', './lib/*'], // Multiple mappings - overloads not supported
           },
         },
+        include: ['*.ts'],
       },
     });
 
     const tsconfigPath = path.resolve(tsconfigFile);
 
-    await expect(jitiOptionsFromTsConfig(tsconfigPath)).rejects.toThrow();
+    await expect(jitiOptionsFromTsConfig(tsconfigPath)).rejects.toThrow(
+      "TypeScript path overloads are not supported by jiti. Path pattern '@/*' has 2 mappings: ./src/*, ./lib/*. Jiti only supports a single alias mapping per pattern.",
+    );
 
     await cleanup();
   });
