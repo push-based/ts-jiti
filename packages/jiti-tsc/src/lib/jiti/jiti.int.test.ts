@@ -86,7 +86,9 @@ describe('jiti', () => {
     // Test that alias resolution works with esmResolve
     const resolvedPath = j.esmResolve('@utils/helper.mjs', baseFolder);
     // Expected: file://<workspace>/tmp/int/jiti-tsc/__test__/jiti-esm-resolve-alias/utils/helper.mjs
-    const expectedPath = pathToFileURL(path.resolve(baseFolder, 'utils', 'helper.mjs')).href;
+    const expectedPath = pathToFileURL(
+      path.resolve(baseFolder, 'utils', 'helper.mjs'),
+    ).href;
 
     expect(resolvedPath).toBe(expectedPath);
 

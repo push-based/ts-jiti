@@ -79,7 +79,9 @@ console.log('args:', process.argv.slice(2));`,
       }),
     ).resolves.toMatchObject({
       code: 0,
-      stdout: expect.stringMatching(/load-ts.*args: \["--load-arg=test"\]|args: \["--load-arg=test"\].*load-ts/),
+      stdout: expect.stringMatching(
+        /load-ts.*args: \["--load-arg=test"\]|args: \["--load-arg=test"\].*load-ts/,
+      ),
     });
     await cleanup();
   });
@@ -103,7 +105,9 @@ console.log('args:', process.argv.slice(2));`,
       }),
     ).resolves.toMatchObject({
       code: 0,
-      stdout: expect.stringMatching(/exec-ts.*args: \["--exec-arg=value"\]|args: \["--exec-arg=value"\].*exec-ts/),
+      stdout: expect.stringMatching(
+        /exec-ts.*args: \["--exec-arg=value"\]|args: \["--exec-arg=value"\].*exec-ts/,
+      ),
     });
     await cleanup();
   });
@@ -128,7 +132,9 @@ console.log('args:', process.argv.slice(2));`,
       }),
     ).resolves.toMatchObject({
       code: 0,
-      stdout: expect.stringMatching(/exec-ts-load-ts.*args: \["--load-ts-arg=hello"\]|args: \["--load-ts-arg=hello"\].*exec-ts-load-ts/),
+      stdout: expect.stringMatching(
+        /exec-ts-load-ts.*args: \["--load-ts-arg=hello"\]|args: \["--load-ts-arg=hello"\].*exec-ts-load-ts/,
+      ),
     });
     await cleanup();
   });
@@ -160,7 +166,9 @@ console.log('args:', process.argv.slice(2));`,
       }),
     ).resolves.toMatchObject({
       code: 0,
-      stdout: expect.stringMatching(/exec-ts-tsconfig-load-ts.*args: \["--tsconfig-arg=path-test"\]|args: \["--tsconfig-arg=path-test"\].*exec-ts-tsconfig-load-ts/),
+      stdout: expect.stringMatching(
+        /exec-ts-tsconfig-load-ts.*args: \["--tsconfig-arg=path-test"\]|args: \["--tsconfig-arg=path-test"\].*exec-ts-tsconfig-load-ts/,
+      ),
     });
     await cleanup();
   });
@@ -194,7 +202,9 @@ console.log('args:', process.argv.slice(2));`,
       }),
     ).resolves.toMatchObject({
       code: 0,
-      stdout: expect.stringMatching(/exec-ts-tsconfig-load-ts-tsconfig.*args: \["--complex-arg=multi-file"\]|args: \["--complex-arg=multi-file"\].*exec-ts-tsconfig-load-ts-tsconfig/),
+      stdout: expect.stringMatching(
+        /exec-ts-tsconfig-load-ts-tsconfig.*args: \["--complex-arg=multi-file"\]|args: \["--complex-arg=multi-file"\].*exec-ts-tsconfig-load-ts-tsconfig/,
+      ),
     });
     await cleanup();
   });
@@ -212,13 +222,13 @@ console.log('args:', process.argv.slice(2));
       command: 'node',
       args: [
         path.relative(envRoot, path.join(baseFolder, 'bin.ts')),
-        '--myArg=42'
+        '--myArg=42',
       ],
       cwd: envRoot,
       silent: true,
       env: {
-        NODE_OPTIONS: "--import jiti-tsc"
-      }
+        NODE_OPTIONS: '--import jiti-tsc',
+      },
     });
 
     expect(code).toBe(0);
@@ -227,5 +237,4 @@ console.log('args:', process.argv.slice(2));
 
     await cleanup();
   });
-
 });
