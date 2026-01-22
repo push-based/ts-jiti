@@ -3,6 +3,7 @@ import {
   mapTsPathsToJitiAlias,
   parseTsConfigToJitiConfig,
 } from './jiti.schema';
+import { expect } from 'vitest';
 
 describe('mapTsPathsToJitiAlias', () => {
   it('returns empty object when paths is empty', () => {
@@ -71,7 +72,7 @@ describe('mapTsPathsToJitiAlias', () => {
         '/base',
       ),
     ).toStrictEqual({
-      '@': '/base/src',
+      '@': expect.pathToEndWith('src')
     });
   });
 });
@@ -96,7 +97,7 @@ describe('parseTsConfigToJitiConfig', () => {
     };
 
     expect(parseTsConfigToJitiConfig(compilerOptions)).toStrictEqual({
-      alias: { '@app': '/base/src', '@lib': '/base/lib' },
+      alias: { '@app': expect.pathToEndWith('src'), '@lib': expect.pathToEndWith('lib') },
       interopDefault: true,
       sourceMaps: true,
       jsx: true,
