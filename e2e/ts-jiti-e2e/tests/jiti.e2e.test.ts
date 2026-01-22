@@ -143,7 +143,7 @@ console.log(\`Executed over jiti-tsc\`);
         cwd: envRoot,
         env: {
           ...process.env,
-          JITI_TS_CONFIG_PATH: path.resolve(path.join(d, 'tsconfig.json')),
+          JITI_TSCONFIG_PATH: path.resolve(path.join(d, 'tsconfig.json')),
         },
         silent: true,
       }),
@@ -175,7 +175,7 @@ console.log(\`Executed over jiti-tsc\`);
         cwd: envRoot,
         env: {
           ...process.env,
-          JITI_TS_CONFIG_PATH: path.resolve(path.join(d, 'tsconfig.json')),
+          JITI_TSCONFIG_PATH: path.resolve(path.join(d, 'tsconfig.json')),
         },
         silent: true,
       }),
