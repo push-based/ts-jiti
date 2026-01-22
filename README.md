@@ -26,21 +26,21 @@ npm install @push-based/jiti-tsc
 ### Usage
 
 ```bash
+# Using jiti-tsc as a global ESM loader with Node.js --import flag
+node --import jiti-tsc/register ./path/to/module.ts
+
+# Using jiti-tsc as a global ESM loader with Node.js --import flag and env variable for tsconfig path
+JITI_TSCONFIG_PATH=./tsconfig.json node --import jiti-tsc/register ./path/to/module.ts
+
+# Run jiti
+npx jiti-tsc ./path/to/module.ts
+
 # Run jiti with tsconfig-derived options
-JITI_TS_CONFIG_PATH=./tsconfig.json npx jiti-tsc ./path/to/module.ts
+JITI_TSCONFIG_PATH=./tsconfig.json npx jiti-tsc ./path/to/module.ts
 
 # Print resolved jiti configuration
-JITI_TS_CONFIG_PATH=./tsconfig.json npx jiti-tsc print-config
+JITI_TSCONFIG_PATH=./tsconfig.json npx jiti-tsc print-config
 ```
-
-This will use your TypeScript configuration to resolve path aliases and other compiler options when running jiti.
-
-## Features
-
-- 🔒 **Type-safe** - Full TypeScript support with path alias resolution
-- 📦 **Zero config** - Automatically detects `tsconfig.json` in the current directory
-- 🎯 **Monorepo support** - Resolves TypeScript path aliases at runtime
-- 📝 **CLI & API** - Both command-line tool and programmatic API available
 
 ## Contributing
 

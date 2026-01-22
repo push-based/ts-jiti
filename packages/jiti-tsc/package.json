@@ -5,6 +5,16 @@
   "type": "module",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.js",
+      "types": "./src/index.d.ts"
+    },
+    "./register": {
+      "import": "./src/register.js",
+      "types": "./src/register.d.ts"
+    }
+  },
   "bin": {
     "jiti-tsc": "./src/bin/bin.js"
   },

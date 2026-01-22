@@ -1,16 +1,28 @@
-import path from 'node:path';
-import { describe, expect, it } from 'vitest';
-import { importModule } from './jiti.js';
-import { osAgnosticPath, TEST_OUTPUT_DIR, fsFromJson } from '@push-based/test-utils';
 import { nxTargetProject } from '@push-based/test-nx-utils';
+import {
+  TEST_OUTPUT_DIR,
+  fsFromJson,
+  osAgnosticPath,
+} from '@push-based/test-utils';
+import { createJiti } from 'jiti';
+import path from 'node:path';
 import type { TsConfigJson } from 'type-fest';
-import {createJiti} from "jiti";
+import { describe, expect, it, vi } from 'vitest';
+import { importModule, jitiOptionsFromTsConfig } from './jiti.js';
+
+vi.mock('./read-ts-config-file.js', () => ({
+  deriveTsConfig: vi.fn(),
+}));
 
 type Plugin = {
   slug: string;
   runner: () => { result: number };
-}
-const pluginContent = (slug: string, isCommonJS = false, utilImport?: string) => {
+};
+const pluginContent = (
+  slug: string,
+  isCommonJS = false,
+  utilImport?: string,
+) => {
   const importStatement = utilImport
     ? `import { formatString } from '${utilImport}';\n`
     : '';
@@ -22,7 +34,7 @@ ${importStatement}const plugin = {
   return isCommonJS
     ? `${pluginObj}\nmodule.exports = plugin;`
     : `${pluginObj}\nexport default plugin;`;
-}
+};
 
 const utilsContent = `
 export function formatString(str: string): string {
@@ -30,7 +42,8 @@ export function formatString(str: string): string {
 }
 `;
 
-const testFileDir = () =>path.join('tmp/int', nxTargetProject(), TEST_OUTPUT_DIR);
+const testFileDir = () =>
+  path.join('tmp/int', nxTargetProject(), TEST_OUTPUT_DIR);
 
 describe('jiti', () => {
   it('should use jiti.esmResolve to resolve module paths', async () => {
@@ -38,7 +51,7 @@ describe('jiti', () => {
     const testFile = path.join(baseFolder, 'test.mjs');
 
     const cleanup = await fsFromJson({
-      [testFile]: `export const value = 'esm-resolved';`
+      [testFile]: `export const value = 'esm-resolved';`,
     });
 
     const absolutePath = path.resolve(testFile);
@@ -61,15 +74,15 @@ describe('jiti', () => {
 
     const cleanup = await fsFromJson({
       [testFile]: `export const value = 'esm-resolved-alias';`,
-      [utilsFile]: `export const helper = 'helper-value';`
+      [utilsFile]: `export const helper = 'helper-value';`,
     });
 
     const absolutePath = path.resolve(testFile);
     const utilsDir = path.resolve(baseFolder, 'utils');
     const j = createJiti(absolutePath, {
       alias: {
-        '@utils': utilsDir
-      }
+        '@utils': utilsDir,
+      },
     });
     // jiti.esmResolve(id) is similar to import.meta.resolve(id)
     // Returns a file:// URL, so we need to convert it to a file path for comparison
@@ -83,13 +96,12 @@ describe('jiti', () => {
     await cleanup();
   });
 
-
   it('should use jiti.import with default option', async () => {
     const baseFolder = path.join(testFileDir(), 'jiti-default-export');
     const testFile = path.join(baseFolder, 'test.mjs');
 
     const cleanup = await fsFromJson({
-      [testFile]: `const value = 'default-export'; export default value;`
+      [testFile]: `const value = 'default-export'; export default value;`,
     });
 
     const absolutePath = path.resolve(testFile);
@@ -102,72 +114,96 @@ describe('jiti', () => {
     await cleanup();
   });
 
-it('should use jiti.import with alias option single @utils', async () => {
-  const baseFolder = path.join(testFileDir(), 'jiti-alias-single');
-  const mainFile = path.join(baseFolder, 'main.mjs');
-  const utilsFile = path.join(baseFolder, 'utils', 'helper.mjs');
+  it('should use jiti.import with alias option single @utils', async () => {
+    const baseFolder = path.join(testFileDir(), 'jiti-alias-single');
+    const mainFile = path.join(baseFolder, 'main.mjs');
+    const utilsFile = path.join(baseFolder, 'utils', 'helper.mjs');
 
-  const cleanup = await fsFromJson({
-    [mainFile]: `
+    const cleanup = await fsFromJson({
+      [mainFile]: `
       import { helper } from '@utils/helper';
       export const result = helper('test');
     `,
-    [utilsFile]: `
+      [utilsFile]: `
       export function helper(str) {
         return \`helper-\${str}\`;
       }
-    `
+    `,
+    });
+
+    const absolutePath = path.resolve(mainFile);
+    const utilsDir = path.resolve(path.dirname(utilsFile));
+    const j = createJiti(absolutePath, {
+      alias: {
+        '@utils': utilsDir,
+      },
+    });
+
+    const mod = (await j.import(absolutePath)) as { result: string };
+    expect(mod.result).toBe('helper-test');
+
+    await cleanup();
   });
 
-  const absolutePath = path.resolve(mainFile);
-  const utilsDir = path.resolve(path.dirname(utilsFile));
-  const j = createJiti(absolutePath, {
-    alias: {
-      '@utils': utilsDir
-    }
-  });
+  it('should use jiti.import with alias option wildcard @utils/*', async () => {
+    const baseFolder = path.join(testFileDir(), 'jiti-alias-wildcard');
+    const mainFile = path.join(baseFolder, 'main.mjs');
+    const utilsFile = path.join(baseFolder, 'utils', 'helper.mjs');
 
-  const mod = await j.import(absolutePath) as { result: string };
-  expect(mod.result).toBe('helper-test');
-
-  await cleanup();
-});
-
-it('should use jiti.import with alias option wildcard @utils/*', async () => {
-  const baseFolder = path.join(testFileDir(), 'jiti-alias-wildcard');
-  const mainFile = path.join(baseFolder, 'main.mjs');
-  const utilsFile = path.join(baseFolder, 'utils', 'helper.mjs');
-
-  const cleanup = await fsFromJson({
-    [mainFile]: `
+    const cleanup = await fsFromJson({
+      [mainFile]: `
       import { helper } from '@utils/helper';
       export const result = helper('test');
     `,
-    [utilsFile]: `
+      [utilsFile]: `
       export function helper(str) {
         return \`helper-\${str}\`;
       }
-    `
+    `,
+    });
+
+    const absolutePath = path.resolve(mainFile);
+    const utilsDir = path.resolve(path.dirname(utilsFile));
+    const j = createJiti(absolutePath, {
+      alias: {
+        '@utils': utilsDir,
+      },
+    });
+
+    const mod = (await j.import(absolutePath)) as { result: string };
+    expect(mod.result).toBe('helper-test');
+
+    await cleanup();
   });
-
-  const absolutePath = path.resolve(mainFile);
-  const utilsDir = path.resolve(path.dirname(utilsFile));
-  const j = createJiti(absolutePath, {
-    alias: {
-      '@utils': utilsDir
-    }
-  });
-
-  const mod = await j.import(absolutePath) as { result: string };
-  expect(mod.result).toBe('helper-test');
-
-  await cleanup();
 });
 
+describe('jitiOptionsFromTsConfig', () => {
+  it('throws error when tsconfig has path overloads (multiple mappings)', async () => {
+    const baseFolder = path.join(testFileDir(), 'tsconfig-path-overloads');
+    const tsconfigFile = path.join(baseFolder, 'tsconfig.json');
+
+    const cleanup = await fsFromJson({
+      [tsconfigFile]: {
+        compilerOptions: {
+          baseUrl: '.',
+          paths: {
+            '@/*': ['./src/*', './lib/*'], // Multiple mappings - overloads not supported
+          },
+        },
+      },
+    });
+
+    const tsconfigPath = path.resolve(tsconfigFile);
+
+    await expect(jitiOptionsFromTsConfig(tsconfigPath)).rejects.toThrow();
+
+    await cleanup();
+  });
 });
 
 describe('importModule', () => {
-  const testCaseDir =  (name: string) => path.join(testFileDir(), 'importModule', name);
+  const testCaseDir = (name: string) =>
+    path.join(testFileDir(), 'importModule', name);
   const setupRegistry = new Set<() => Promise<void>>();
 
   /**
@@ -208,7 +244,7 @@ describe('importModule', () => {
     case: testCase,
     plugin = {},
     tsconfig,
-    tsconfigBase
+    tsconfigBase,
   }: {
     case: string;
     plugin?: { slug?: string; ext?: string; utilImport?: string };
@@ -221,7 +257,9 @@ describe('importModule', () => {
     const isCjs = ext === 'cjs';
 
     const pluginPath = path.join(base, `plugin.${ext}`);
-    const basePath = tsconfigBase ? path.join(base, 'tsconfig.base.json') : undefined;
+    const basePath = tsconfigBase
+      ? path.join(base, 'tsconfig.base.json')
+      : undefined;
     const configPath = tsconfig ? path.join(base, 'tsconfig.json') : undefined;
 
     const utilFiles = plugin.utilImport
@@ -231,7 +269,7 @@ describe('importModule', () => {
           const utilPath = path.join(
             base,
             alias ?? '',
-            `${(rest ?? plugin.utilImport.replace(/^@[^/]+\//, '')).replace(/\/$/, '')}.ts`
+            `${(rest ?? plugin.utilImport.replace(/^@[^/]+\//, '')).replace(/\/$/, '')}.ts`,
           );
           return { [utilPath]: utilsContent };
         })()
@@ -247,11 +285,7 @@ describe('importModule', () => {
     };
 
     const files: Record<string, unknown> = {
-      [pluginPath]: pluginContent(
-        slug,
-        isCjs,
-        plugin.utilImport
-      ),
+      [pluginPath]: pluginContent(slug, isCjs, plugin.utilImport),
       ...utilFiles,
       ...tsconfigFiles,
     };
@@ -266,7 +300,7 @@ describe('importModule', () => {
       filepath: path.join(base, `plugin.${ext}`),
       ...(tsconfigPath ? { tsconfig: tsconfigPath } : {}),
       ...(tsconfigBasePath ? { tsconfigBase: tsconfigBasePath } : {}),
-      cleanup
+      cleanup,
     };
   }
 
@@ -285,10 +319,12 @@ describe('importModule', () => {
   ])('should load a module with $ext extension', async ({ ext, slug }) => {
     const { filepath } = await setupTestCase({
       case: slug,
-      plugin: { slug, ext }
+      plugin: { slug, ext },
     });
 
-    const plugin = await importModule<Plugin>({filepath: path.resolve(filepath)});
+    const plugin = await importModule<Plugin>({
+      filepath: path.resolve(filepath),
+    });
 
     expect(plugin).toStrictEqual({ slug, runner: expect.any(Function) });
     expect(plugin.runner()).toStrictEqual({ result: slug });
@@ -306,7 +342,10 @@ describe('importModule', () => {
       },
     });
 
-    const plugin = await importModule<Plugin>({filepath: path.resolve(filepath), tsconfig: path.resolve(tsconfig)});
+    const plugin = await importModule<Plugin>({
+      filepath: path.resolve(filepath),
+      tsconfig: path.resolve(tsconfig),
+    });
 
     expect(plugin).toStrictEqual({ slug, runner: expect.any(Function) });
     expect(plugin.runner()).toStrictEqual({ result: slug });
@@ -321,7 +360,7 @@ describe('importModule', () => {
         compilerOptions: {
           baseUrl: '.',
           paths: {
-            '@utils/*': ['./utils/*']
+            '@utils/*': ['./utils/*'],
           },
           esModuleInterop: true,
           sourceMap: true,
@@ -330,7 +369,10 @@ describe('importModule', () => {
       },
     });
 
-    const plugin = await importModule<Plugin>({filepath: path.resolve(filepath), tsconfig: tsconfig ? path.resolve(tsconfig) : undefined});
+    const plugin = await importModule<Plugin>({
+      filepath: path.resolve(filepath),
+      tsconfig: tsconfig ? path.resolve(tsconfig) : undefined,
+    });
 
     expect(plugin).toStrictEqual({ slug, runner: expect.any(Function) });
     expect(plugin.runner()).toStrictEqual({ result: `formatted-${slug}` });
@@ -338,7 +380,7 @@ describe('importModule', () => {
 
   it('should load a valid TS module with a extending tsconfig containing all jiti mappable options', async () => {
     const slug = 'load-ts-extending-tsconfig';
-    const { filepath, tsconfig} = await setupTestCase({
+    const { filepath, tsconfig } = await setupTestCase({
       case: slug,
       plugin: { slug, ext: 'ts', utilImport: '@utils/string' },
       tsconfig: {
@@ -349,7 +391,7 @@ describe('importModule', () => {
       tsconfigBase: {
         compilerOptions: {
           paths: {
-            '@utils/*': ['./utils/*']
+            '@utils/*': ['./utils/*'],
           },
           esModuleInterop: true,
           sourceMap: true,
@@ -358,7 +400,10 @@ describe('importModule', () => {
       },
     });
 
-    const plugin = await importModule<Plugin>({filepath: path.resolve(filepath), tsconfig: tsconfig ? path.resolve(tsconfig) : undefined});
+    const plugin = await importModule<Plugin>({
+      filepath: path.resolve(filepath),
+      tsconfig: tsconfig ? path.resolve(tsconfig) : undefined,
+    });
 
     expect(plugin).toStrictEqual({ slug, runner: expect.any(Function) });
     expect(plugin.runner()).toStrictEqual({ result: `formatted-${slug}` });
@@ -367,7 +412,9 @@ describe('importModule', () => {
   it('should throw if the file does not exist', async () => {
     await expect(
       importModule({ filepath: 'path/to/non-existent-export.mjs' }),
-    ).rejects.toThrow(`File '${osAgnosticPath('path/to/non-existent-export.mjs')}' does not exist`);
+    ).rejects.toThrow(
+      `File '${osAgnosticPath('path/to/non-existent-export.mjs')}' does not exist`,
+    );
   });
 
   it('should throw if path is a directory', async () => {

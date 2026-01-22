@@ -1,5 +1,5 @@
 import type { JitiOptions } from 'jiti';
-import { TS_JITI_TS_CONFIG_PATH_ENV_VAR } from '../jiti/constants.js';
+import { JITI_TSCONFIG_PATH_ENV_VAR } from '../jiti/constants.js';
 import { jitiOptionsFromTsConfig } from '../jiti/jiti.js';
 import { helpCommand, isHelpCommand } from './help.command.js';
 import { jitiCommand } from './jiti.command.js';
@@ -12,14 +12,17 @@ import {
 export async function runCli(): Promise<void> {
   const args = process.argv.slice(2);
   const { output, positionalArgs } = parseCliArgs(args);
-  const tsconfigPath = process.env[TS_JITI_TS_CONFIG_PATH_ENV_VAR] ?? './tsconfig.json';
+  const tsconfigPath =
+    process.env[JITI_TSCONFIG_PATH_ENV_VAR] ?? './tsconfig.json';
 
   if (isHelpCommand(args)) {
     helpCommand();
     return;
   }
 
-  const jitiOptions: JitiOptions = tsconfigPath ?await jitiOptionsFromTsConfig(tsconfigPath) : {};
+  const jitiOptions: JitiOptions = tsconfigPath
+    ? await jitiOptionsFromTsConfig(tsconfigPath)
+    : {};
 
   if (isPrintConfigCommand(args)) {
     await printConfigCommand(jitiOptions, {

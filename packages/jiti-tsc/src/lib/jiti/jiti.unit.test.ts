@@ -50,9 +50,12 @@ describe('createTsJiti', () => {
     });
 
     expect(deriveTsConfig).toHaveBeenCalledWith('/test/tsconfig.json');
-    expect(parseTsConfigToJitiConfig).toHaveBeenCalledWith({
-      paths: { '@/*': ['./src/*'] },
-    }, '/test');
+    expect(parseTsConfigToJitiConfig).toHaveBeenCalledWith(
+      {
+        paths: { '@/*': ['./src/*'] },
+      },
+      '/test',
+    );
     expect(createJiti).toHaveBeenCalledWith('/test/file.js', {
       sourceMaps: false,
       alias: { '@': '/path/to/src' },
@@ -102,31 +105,11 @@ describe('jitiOptionsFromTsConfig', () => {
     const result = await jitiOptionsFromTsConfig('/test/tsconfig.json');
 
     expect(deriveTsConfig).toHaveBeenCalledWith('/test/tsconfig.json');
-    expect(parseTsConfigToJitiConfig).toHaveBeenCalledWith(mockCompilerOptions, '/test');
-    expect(result).toBe(mockJitiOptions);
-  });
-
-  it('throws error when tsconfig has path overloads (multiple mappings)', async () => {
-    vi.clearAllMocks();
-    const mockCompilerOptions = {
-      paths: {
-        // Multiple mappings - overloads not supported
-        '@/*': ['./src/*', './lib/*'], 
-      },
-      baseUrl: '/test',
-    };
-
-    vi.mocked(deriveTsConfig).mockResolvedValue(mockCompilerOptions);
-    const actualModule = await vi.importActual<typeof import('./jiti.schema.js')>('./jiti.schema.js');
-    vi.mocked(parseTsConfigToJitiConfig).mockImplementation(actualModule.parseTsConfigToJitiConfig);
-
-    await expect(
-      jitiOptionsFromTsConfig('/test/tsconfig.json'),
-    ).rejects.toThrow(
-      "TypeScript path overloads are not supported by jiti. Path pattern '@/*' has 2 mappings: ./src/*, ./lib/*. Jiti only supports a single alias mapping per pattern.",
+    expect(parseTsConfigToJitiConfig).toHaveBeenCalledWith(
+      mockCompilerOptions,
+      '/test',
     );
-
-    expect(deriveTsConfig).toHaveBeenCalledWith('/test/tsconfig.json');
+    expect(result).toBe(mockJitiOptions);
   });
 });
 

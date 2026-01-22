@@ -15,20 +15,20 @@ Options:
   -h, --help                   Display help information
 
 Environment Variables:
-  JITI_TS_CONFIG_PATH          Path to TypeScript configuration file
+  JITI_TSCONFIG_PATH          Path to TypeScript configuration file
 
 Examples:
   # Run jiti with tsconfig options
-  JITI_TS_CONFIG_PATH=./tsconfig.json jiti-tsc ./path/to/module.ts
+  JITI_TSCONFIG_PATH=./tsconfig.json jiti-tsc ./path/to/module.ts
 
   # Run jiti without tsconfig
   jiti-tsc ./path/to/module.ts
 
   # Print resolved jiti configuration
-  JITI_TS_CONFIG_PATH=./tsconfig.json jiti-tsc print-config
+  JITI_TSCONFIG_PATH=./tsconfig.json jiti-tsc print-config
 
   # Print configuration to file
-  JITI_TS_CONFIG_PATH=./tsconfig.json jiti-tsc print-config --output=./jiti-config.json
+  JITI_TSCONFIG_PATH=./tsconfig.json jiti-tsc print-config --output=./jiti-config.json
     `;
 
 export function isHelpCommand(args: string[]): boolean {

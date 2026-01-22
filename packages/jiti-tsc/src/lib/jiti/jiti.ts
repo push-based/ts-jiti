@@ -1,11 +1,9 @@
 import { type JitiOptions, createJiti as createJitiSource } from 'jiti';
 import path from 'node:path';
 import { fileExists } from '../utils/file-system.js';
-import {
-  type MappableJitiOptions,
-  parseTsConfigToJitiConfig,
-} from './jiti.schema.js';
+import { type MappableJitiOptions, parseTsConfigToJitiConfig } from './jiti.schema.js';
 import { deriveTsConfig } from './read-ts-config-file.js';
+
 
 /**
  * Create a jiti instance with options derived from tsconfig.
@@ -33,17 +31,10 @@ export async function createTsJiti(
 export async function jitiOptionsFromTsConfig(
   tsconfigPath: string,
 ): Promise<MappableJitiOptions> {
-  try {
-    const compilerOptions = await deriveTsConfig(tsconfigPath);
-    const tsconfigDir = path.dirname(tsconfigPath);
-    return parseTsConfigToJitiConfig(compilerOptions, tsconfigDir);
-  } catch (error) {
-    console.warn(`Failed to load tsconfig from ${tsconfigPath}:`, error);
-    return {};
-  }
-}
-
-/*
+  const compilerOptions = await deriveTsConfig(tsconfigPath);
+  const tsconfigDir = path.dirname(tsconfigPath);
+  return parseTsConfigToJitiConfig(compilerOptions, tsconfigDir);
+}/*
  * Import a module using jiti with tsconfig support
  */
 export async function importModule<T = unknown>(
