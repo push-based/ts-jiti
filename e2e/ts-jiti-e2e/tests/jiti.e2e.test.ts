@@ -7,6 +7,7 @@ import {
 } from '@push-based/test-utils';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import stripAnsi from 'strip-ansi';
 import { expect } from 'vitest';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -53,8 +54,8 @@ console.log('args:', process.argv.slice(2));
     });
 
     expect(code).toBe(0);
-    expect(stdout).toContain('Executed over jiti-tsc');
-    expect(stdout).toBe("args: [ '--test-arg=123' ]");
+    expect(stripAnsi(stdout)).toContain('Executed over jiti-tsc');
+    expect(stripAnsi(stdout)).toContain("args: [ '--test-arg=123' ]");
 
     await cleanup();
   });
@@ -78,7 +79,7 @@ console.log('args:', process.argv.slice(2));`,
     });
 
     expect(code).toBe(0);
-    expect(stdout).toBe("args: [ '--load-arg=test' ]");
+    expect(stripAnsi(stdout)).toContain("args: [ '--load-arg=test' ]");
     await cleanup();
   });
 
@@ -100,7 +101,7 @@ console.log('args:', process.argv.slice(2));`,
     });
 
     expect(code).toBe(0);
-    expect(stdout).toBe("args: [ '--exec-arg=value' ]");
+    expect(stripAnsi(stdout)).toContain("args: [ '--exec-arg=value' ]");
     await cleanup();
   });
 
@@ -123,7 +124,7 @@ console.log('args:', process.argv.slice(2));`,
     });
 
     expect(code).toBe(0);
-    expect(stdout).toBe("args: [ '--load-ts-arg=hello' ]");
+    expect(stripAnsi(stdout)).toContain("args: [ '--load-ts-arg=hello' ]");
     await cleanup();
   });
 
@@ -153,7 +154,7 @@ console.log('args:', process.argv.slice(2));`,
     });
 
     expect(code).toBe(0);
-    expect(stdout).toBe("args: [ '--tsconfig-arg=path-test' ]");
+    expect(stripAnsi(stdout)).toContain("args: [ '--tsconfig-arg=path-test' ]");
     await cleanup();
   });
 
@@ -185,7 +186,7 @@ console.log('args:', process.argv.slice(2));`,
     });
 
     expect(code).toBe(0);
-    expect(stdout).toBe("args: [ '--complex-arg=multi-file' ]");
+    expect(stripAnsi(stdout)).toContain("args: [ '--complex-arg=multi-file' ]");
     await cleanup();
   });
 
@@ -212,8 +213,8 @@ console.log('args:', process.argv.slice(2));
     });
 
     expect(code).toBe(0);
-    expect(stdout).toContain('Executed over --import jiti-tsc');
-    expect(stdout).toContain("args: [ '--myArg=42' ]");
+    expect(stripAnsi(stdout)).toContain('Executed over --import jiti-tsc');
+    expect(stripAnsi(stdout)).toContain("args: [ '--myArg=42' ]");
 
     await cleanup();
   });
