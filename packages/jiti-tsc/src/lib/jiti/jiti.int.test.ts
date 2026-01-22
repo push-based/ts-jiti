@@ -1,14 +1,11 @@
 import { nxTargetProject } from '@push-based/test-nx-utils';
-import {
-  TEST_OUTPUT_DIR,
-  fsFromJson,
-  osAgnosticPath,
-} from '@push-based/test-utils';
+import { TEST_OUTPUT_DIR, fsFromJson, osAgnosticPath } from '@push-based/test-utils';
 import { createJiti } from 'jiti';
 import path from 'node:path';
 import type { TsConfigJson } from 'type-fest';
 import { describe, expect, it } from 'vitest';
 import { importModule, jitiOptionsFromTsConfig } from './jiti.js';
+
 
 type Plugin = {
   slug: string;
@@ -87,7 +84,7 @@ describe('jiti', () => {
     // Expected: file://<workspace>/tmp/int/jiti-tsc/__test__/jiti-esm-resolve-alias/utils/helper.mjs
     const expectedPath = `file://${path.resolve(baseFolder, 'utils', 'helper.mjs')}`;
 
-    expect(resolvedPath).toMatchPath(expectedPath);
+    expect(resolvedPath).toEndWithPath(expectedPath);
 
     await cleanup();
   });
