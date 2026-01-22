@@ -37,6 +37,7 @@ describe('CLI jiti', () => {
     const cleanup = await fsFromJson({
       [path.join(baseFolder, 'bin.ts')]: `#!/usr/bin/env node
 console.log(\`Executed over jiti-tsc\`);
+console.log('args:', process.argv.slice(2));
 `,
     });
 
@@ -45,6 +46,7 @@ console.log(\`Executed over jiti-tsc\`);
       args: [
         '@push-based/jiti-tsc',
         path.relative(envRoot, path.join(baseFolder, 'bin.ts')),
+        '--test-arg=123',
       ],
       cwd: envRoot,
       silent: true,
@@ -52,6 +54,7 @@ console.log(\`Executed over jiti-tsc\`);
 
     expect(code).toBe(0);
     expect(stdout).toContain('Executed over jiti-tsc');
+    expect(stdout).toContain('args: ["--test-arg=123"]');
 
     await cleanup();
   });
@@ -59,7 +62,8 @@ console.log(\`Executed over jiti-tsc\`);
   it('should load .ts', async () => {
     const d = getTestDir('load-ts');
     const cleanup = await fsFromJson({
-      [path.join(d, 'a.js')]: `import { x } from './b.ts'; console.log(x);`,
+      [path.join(d, 'a.js')]: `import { x } from './b.ts'; console.log(x);
+console.log('args:', process.argv.slice(2));`,
       [path.join(d, 'b.ts')]: `export const x = 'load-ts';`,
     });
     await expect(
@@ -68,13 +72,14 @@ console.log(\`Executed over jiti-tsc\`);
         args: [
           '@push-based/jiti-tsc',
           path.relative(envRoot, path.join(d, 'a.js')),
+          '--load-arg=test',
         ],
         cwd: envRoot,
         silent: true,
       }),
     ).resolves.toMatchObject({
       code: 0,
-      stdout: expect.stringContaining('load-ts'),
+      stdout: expect.stringMatching(/load-ts.*args: \["--load-arg=test"\]|args: \["--load-arg=test"\].*load-ts/),
     });
     await cleanup();
   });
@@ -82,7 +87,8 @@ console.log(\`Executed over jiti-tsc\`);
   it('should exec .ts', async () => {
     const d = getTestDir('exec-ts');
     const cleanup = await fsFromJson({
-      [path.join(d, 'a.ts')]: `console.log('exec-ts');`,
+      [path.join(d, 'a.ts')]: `console.log('exec-ts');
+console.log('args:', process.argv.slice(2));`,
     });
     await expect(
       executeProcess({
@@ -90,13 +96,14 @@ console.log(\`Executed over jiti-tsc\`);
         args: [
           '@push-based/jiti-tsc',
           path.relative(envRoot, path.join(d, 'a.ts')),
+          '--exec-arg=value',
         ],
         cwd: envRoot,
         silent: true,
       }),
     ).resolves.toMatchObject({
       code: 0,
-      stdout: expect.stringContaining('exec-ts'),
+      stdout: expect.stringMatching(/exec-ts.*args: \["--exec-arg=value"\]|args: \["--exec-arg=value"\].*exec-ts/),
     });
     await cleanup();
   });
@@ -104,7 +111,8 @@ console.log(\`Executed over jiti-tsc\`);
   it('should exec .ts loading .ts', async () => {
     const d = getTestDir('exec-ts-load-ts');
     const cleanup = await fsFromJson({
-      [path.join(d, 'a.ts')]: `import { x } from './b.js'; console.log(x);`,
+      [path.join(d, 'a.ts')]: `import { x } from './b.js'; console.log(x);
+console.log('args:', process.argv.slice(2));`,
       [path.join(d, 'b.ts')]: `export const x = 'exec-ts-load-ts';`,
     });
     await expect(
@@ -113,13 +121,14 @@ console.log(\`Executed over jiti-tsc\`);
         args: [
           '@push-based/jiti-tsc',
           path.relative(envRoot, path.join(d, 'a.ts')),
+          '--load-ts-arg=hello',
         ],
         cwd: envRoot,
         silent: true,
       }),
     ).resolves.toMatchObject({
       code: 0,
-      stdout: expect.stringContaining('exec-ts-load-ts'),
+      stdout: expect.stringMatching(/exec-ts-load-ts.*args: \["--load-ts-arg=hello"\]|args: \["--load-ts-arg=hello"\].*exec-ts-load-ts/),
     });
     await cleanup();
   });
@@ -130,7 +139,8 @@ console.log(\`Executed over jiti-tsc\`);
       [path.join(d, 'tsconfig.json')]: {
         compilerOptions: { baseUrl: '.', paths: { '@/*': ['./*'] } },
       },
-      [path.join(d, 'a.ts')]: `import { x } from '@/b.js'; console.log(x);`,
+      [path.join(d, 'a.ts')]: `import { x } from '@/b.js'; console.log(x);
+console.log('args:', process.argv.slice(2));`,
       [path.join(d, 'b.ts')]: `export const x = 'exec-ts-tsconfig-load-ts';`,
     });
     await expect(
@@ -139,6 +149,7 @@ console.log(\`Executed over jiti-tsc\`);
         args: [
           '@push-based/jiti-tsc',
           path.relative(envRoot, path.join(d, 'a.ts')),
+          '--tsconfig-arg=path-test',
         ],
         cwd: envRoot,
         env: {
@@ -149,7 +160,7 @@ console.log(\`Executed over jiti-tsc\`);
       }),
     ).resolves.toMatchObject({
       code: 0,
-      stdout: expect.stringContaining('exec-ts-tsconfig-load-ts'),
+      stdout: expect.stringMatching(/exec-ts-tsconfig-load-ts.*args: \["--tsconfig-arg=path-test"\]|args: \["--tsconfig-arg=path-test"\].*exec-ts-tsconfig-load-ts/),
     });
     await cleanup();
   });
@@ -160,7 +171,8 @@ console.log(\`Executed over jiti-tsc\`);
       [path.join(d, 'tsconfig.json')]: {
         compilerOptions: { baseUrl: '.', paths: { '@/*': ['./*'] } },
       },
-      [path.join(d, 'a.ts')]: `import { x } from '@/b.js'; console.log(x);`,
+      [path.join(d, 'a.ts')]: `import { x } from '@/b.js'; console.log(x);
+console.log('args:', process.argv.slice(2));`,
       [path.join(d, 'b.ts')]: `import { y } from '@/c.js'; export const x = y;`,
       [path.join(d, 'c.ts')]:
         `export const y = 'exec-ts-tsconfig-load-ts-tsconfig';`,
@@ -171,6 +183,7 @@ console.log(\`Executed over jiti-tsc\`);
         args: [
           '@push-based/jiti-tsc',
           path.relative(envRoot, path.join(d, 'a.ts')),
+          '--complex-arg=multi-file',
         ],
         cwd: envRoot,
         env: {
@@ -181,7 +194,7 @@ console.log(\`Executed over jiti-tsc\`);
       }),
     ).resolves.toMatchObject({
       code: 0,
-      stdout: expect.stringContaining('exec-ts-tsconfig-load-ts-tsconfig'),
+      stdout: expect.stringMatching(/exec-ts-tsconfig-load-ts-tsconfig.*args: \["--complex-arg=multi-file"\]|args: \["--complex-arg=multi-file"\].*exec-ts-tsconfig-load-ts-tsconfig/),
     });
     await cleanup();
   });
@@ -191,6 +204,7 @@ console.log(\`Executed over jiti-tsc\`);
     const cleanup = await fsFromJson({
       [path.join(baseFolder, 'bin.ts')]: `#!/usr/bin/env node
 console.log(\`Executed over --import jiti-tsc\`);
+console.log('args:', process.argv.slice(2));
 `,
     });
 
@@ -198,6 +212,7 @@ console.log(\`Executed over --import jiti-tsc\`);
       command: 'node',
       args: [
         path.relative(envRoot, path.join(baseFolder, 'bin.ts')),
+        '--myArg=42'
       ],
       cwd: envRoot,
       silent: true,
@@ -208,6 +223,7 @@ console.log(\`Executed over --import jiti-tsc\`);
 
     expect(code).toBe(0);
     expect(stdout).toContain('Executed over --import jiti-tsc');
+    expect(stdout).toContain('args: ["--myArg=42"]');
 
     await cleanup();
   });
