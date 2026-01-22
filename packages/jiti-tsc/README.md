@@ -7,6 +7,7 @@
 This library does one simple thing: it converts TypeScript path aliases to jiti-compatible alias options and wrapd the original jiti API to make it easier to use in monorepo environments.
 
 **✅ Full TypeScript configuration support:**
+
 - ✅ FAutomatically detected from the `tsconfig.json` file in the current working directory
 - ✅ FAccepts custom tsconfig path via the `JITI_TSCONFIG_PATH`
 - ✅ FCLI tool supporting tsconfig options

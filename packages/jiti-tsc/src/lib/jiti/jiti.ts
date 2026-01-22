@@ -34,7 +34,7 @@ export async function jitiOptionsFromTsConfig(
   const compilerOptions = await deriveTsConfig(tsconfigPath);
   const tsconfigDir = path.dirname(tsconfigPath);
   return parseTsConfigToJitiConfig(compilerOptions, tsconfigDir);
-}/*
+} /*
  * Import a module using jiti with tsconfig support
  */
 export async function importModule<T = unknown>(
