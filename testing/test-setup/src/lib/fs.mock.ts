@@ -1,5 +1,6 @@
-import { type MockInstance, afterEach, beforeEach, vi } from 'vitest';
-import { MEMFS_VOLUME } from '@push-based/test-utils';
+import { vi } from 'vitest';
+
+const MEMFS_VOLUME = '/test';
 
 vi.mock('fs', async () => {
   const memfs: typeof import('memfs') = await vi.importActual('memfs');
@@ -10,12 +11,4 @@ vi.mock('fs/promises', async () => {
   return memfs.fs.promises;
 });
 
-let cwdSpy: MockInstance<[], string>;
-
-beforeEach(() => {
-  cwdSpy = vi.spyOn(process, 'cwd').mockReturnValue(MEMFS_VOLUME);
-});
-
-afterEach(() => {
-  cwdSpy.mockRestore();
-});
+// Removed process.cwd() mock as we're now using real files

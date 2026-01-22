@@ -3,7 +3,6 @@ import { JITI_TSCONFIG_PATH_ENV_VAR } from './lib/jiti/constants.js';
 import { jitiOptionsFromTsConfig } from './lib/jiti/jiti.js';
 import { jitiOptionsToEnv } from './lib/jiti/jiti.schema.js';
 
-
 /**
  * Register jiti loader with tsconfig support for use with Node.js --import flag
  *

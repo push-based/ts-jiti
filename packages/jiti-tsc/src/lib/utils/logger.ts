@@ -29,7 +29,7 @@ const SIGINT_EXIT_CODE_WINDOWS = SIGINT_CODE;
 
 /* eslint-disable max-lines-per-function */
 export class Logger {
-  #isVerbose = isEnvVarEnabled('ZNX_VERBOSE');
+  #isVerbose = isEnvVarEnabled('JITI_VERBOSE');
   #isCI = isEnvVarEnabled('CI');
   #ciPlatform: CiPlatform | undefined = isEnvVarEnabled('GITHUB_ACTIONS')
     ? 'GitHub Actions'

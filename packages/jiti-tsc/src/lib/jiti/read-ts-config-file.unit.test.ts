@@ -1,182 +1,172 @@
-import { osAgnosticPath } from '@push-based/test-utils';
-import { describe, expect, vi } from 'vitest';
-import {
-  loadTargetConfig,
-  deriveTsConfig,
-} from './read-ts-config-file.js';
+import { fsFromJson } from '@push-based/test-utils';
+import { rm } from 'node:fs/promises';
+import path from 'node:path';
+import { describe, expect } from 'vitest';
+import { deriveTsConfig, loadTargetConfig } from './read-ts-config-file.js';
 
-vi.mock('../utils/file-system.js', async importOriginal => {
-  const original = await importOriginal();
-  return {
-    ...(original as object),
-    fileExists: vi.fn(),
-  };
-});
-
-// Mock TypeScript functions
-vi.mock('typescript', async () => {
-  const actual = await vi.importActual('typescript');
-  return {
-    ...actual,
-    readConfigFile: vi.fn(),
-    parseJsonConfigFileContent: vi.fn(),
-    sys: {
-      readFile: vi.fn(),
-    },
-  };
-});
-
-vi.mock('../utils/logger.js', () => ({
-  logger: {
-    error: vi.fn(),
-    warn: vi.fn(),
-    info: vi.fn(),
-    debug: vi.fn(),
-    newline: vi.fn(),
-    group: vi.fn(async (_, worker) => {
-      const value = await worker();
-      return typeof value === 'object' ? value.result : undefined;
-    }),
-    task: vi.fn(async (_, worker) => {
-      const value = await worker();
-      return typeof value === 'object' ? value.result : undefined;
-    }),
-    command: vi.fn((_, worker) => worker()),
-  },
-}));
-
-vi.mock('node:process', async () => {
-  const actual = await vi.importActual('node:process');
-  return {
-    ...actual,
-    cwd: vi.fn(() => '/test'),
-  };
-});
-
-vi.mock('node:path', async () => {
-  const actual = await vi.importActual('node:path');
-  return {
-    ...actual,
-    resolve: vi.fn((...args) => args.at(-1)), // Return the last argument
-    dirname: vi.fn(() => '/mock/dir'),
-    join: vi.fn((...args) => args.join('/')),
-  };
-});
+const TEST_OUTPUT_BASE = 'tmp';
 
 describe('loadTargetConfig', () => {
-  let readConfigFile: any;
-  let parseJsonConfigFileContent: any;
-
-  beforeAll(async () => {
-    const tsModule = await import('typescript');
-    readConfigFile = tsModule.readConfigFile;
-    parseJsonConfigFileContent = tsModule.parseJsonConfigFileContent;
-  });
-
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it('throws error when reading config fails', () => {
-    readConfigFile.mockReturnValueOnce({
-      config: {},
-      error: { messageText: 'File not found' },
+  afterAll(async () => {
+    await rm(path.join(TEST_OUTPUT_BASE, 'load-target-config'), {
+      recursive: true,
+      force: true,
     });
+  });
 
-    expect(() => loadTargetConfig('missing.json')).toThrow(
-      `Error reading TypeScript config file at ${osAgnosticPath('missing.json')}:\nFile not found`,
-    );
-    expect(readConfigFile).toHaveBeenCalledWith(
-      '/test/missing.json',
-      expect.any(Function),
+  it('throws error when reading config fails', async () => {
+    await expect(() => loadTargetConfig('missing.json')).toThrow(
+      'Error reading TypeScript config file',
     );
   });
 
-  it('throws error when no files match configuration', () => {
-    readConfigFile.mockReturnValueOnce({ config: {}, error: undefined });
-    parseJsonConfigFileContent.mockReturnValueOnce({
-      fileNames: [],
-    });
+  it('throws error when no files match configuration', async () => {
+    const testDirPath = path.join(
+      TEST_OUTPUT_BASE,
+      'should-throw-no-files-match',
+    );
+    const cleanup = await fsFromJson(
+      {
+        'tsconfig.json': {
+          compilerOptions: {
+            target: 'es2020',
+            module: 'commonjs',
+          },
+          include: [],
+          // Empty include should match no files
+        },
+      },
+      testDirPath,
+    );
 
-    expect(() => loadTargetConfig('empty.json')).toThrow(
+    const configPath = path.join(testDirPath, 'tsconfig.json');
+
+    expect(() => loadTargetConfig(configPath)).toThrow(
       'No files matched by the TypeScript configuration. Check your "include", "exclude" or "files" settings.',
     );
+
+    await cleanup();
   });
 
-  it('returns parsed config when valid', () => {
-    const mockConfig = { compilerOptions: { strict: true } };
-    readConfigFile.mockReturnValueOnce({
-      config: mockConfig,
-      error: undefined,
-    });
-    parseJsonConfigFileContent.mockReturnValueOnce({
-      fileNames: ['src/index.ts'],
-      options: { strict: true },
-    });
+  it('returns parsed config when valid', async () => {
+    const testDirValid = path.join(
+      TEST_OUTPUT_BASE,
+      'should-return-parsed-config',
+    );
+    const cleanup = await fsFromJson(
+      {
+        'tsconfig.json': {
+          compilerOptions: {
+            strict: true,
+            target: 'es2020',
+            module: 'commonjs',
+          },
+          files: ['index.ts'],
+        },
+        'index.ts': 'export const dummy = 42;',
+      },
+      testDirValid,
+    );
 
-    const result = loadTargetConfig('tsconfig.json');
-    expect(result).toEqual({
-      fileNames: ['src/index.ts'],
-      options: { strict: true },
-    });
+    const configPath = path.join(testDirValid, 'tsconfig.json');
+
+    const result = loadTargetConfig(configPath);
+    expect(result).toEqual(
+      expect.objectContaining({
+        fileNames: expect.arrayContaining([
+          expect.stringContaining('index.ts'),
+        ]),
+        options: expect.objectContaining({
+          strict: true,
+          target: 7, // ScriptTarget.ES2020
+          module: 1, // ModuleKind.CommonJS
+        }),
+      }),
+    );
+
+    await cleanup();
   });
 });
 
 describe('deriveTsConfig', () => {
-  let fileExists: any;
-  let readConfigFile: any;
-  let parseJsonConfigFileContent: any;
-
-  beforeAll(async () => {
-    const fsUtilsModule = await import('../utils/file-system.js');
-    fileExists = vi.spyOn(fsUtilsModule, 'fileExists');
-
-    const tsModule = await import('typescript');
-    readConfigFile = tsModule.readConfigFile;
-    parseJsonConfigFileContent = tsModule.parseJsonConfigFileContent;
-  });
-
-  beforeEach(() => {
-    vi.clearAllMocks();
+  afterAll(async () => {
+    await rm(path.join(TEST_OUTPUT_BASE, 'derive-ts-config'), {
+      recursive: true,
+      force: true,
+    });
   });
 
   it('throws error when tsconfig file does not exist', async () => {
-    fileExists.mockResolvedValueOnce(false);
-
     await expect(deriveTsConfig('missing.json')).rejects.toThrow(
-      `Tsconfig file not found at path: ${osAgnosticPath('missing.json')}`,
+      'Tsconfig file not found at path: missing.json',
     );
-    expect(fileExists).toHaveBeenCalledWith('missing.json');
   });
 
   it('returns compiler options when file exists', async () => {
-    fileExists.mockResolvedValueOnce(true);
-    readConfigFile.mockReturnValueOnce({
-      config: { compilerOptions: { esModuleInterop: true } },
-      error: undefined,
-    });
-    parseJsonConfigFileContent.mockReturnValueOnce({
-      options: { esModuleInterop: true },
-      fileNames: ['src/index.ts'],
-    });
+    const testDirOptions = path.join(
+      TEST_OUTPUT_BASE,
+      'should-return-compiler-options',
+    );
+    const cleanup = await fsFromJson(
+      {
+        'tsconfig.json': {
+          compilerOptions: {
+            esModuleInterop: true,
+            target: 'es2020',
+            module: 'commonjs',
+          },
+          files: ['index.ts'],
+        },
+        'index.ts': 'export const dummy = 42;',
+      },
+      testDirOptions,
+    );
 
-    const result = await deriveTsConfig('tsconfig.json');
-    expect(result).toEqual({ esModuleInterop: true });
+    const configPath = path.join(testDirOptions, 'tsconfig.json');
+
+    const result = await deriveTsConfig(configPath);
+    expect(result).toEqual(
+      expect.objectContaining({
+        esModuleInterop: true,
+        target: 7, // ScriptTarget.ES2020
+        module: 1, // ModuleKind.CommonJS
+      }),
+    );
+
+    await cleanup();
   });
 
-  it('call loadTargetConfig to parse config file', async () => {
-    fileExists.mockResolvedValueOnce(true);
-    readConfigFile.mockReturnValueOnce({
-      config: { compilerOptions: { paths: { '@/*': ['./src/*'] } } },
-      error: undefined,
-    });
-    parseJsonConfigFileContent.mockReturnValueOnce({
-      options: { paths: { '@/*': ['./src/*'] } },
-      fileNames: ['src/index.ts'],
-    });
+  it('parses config file with paths', async () => {
+    const testDir = path.join(
+      TEST_OUTPUT_BASE,
+      'should-parse-config-with-paths',
+    );
+    const cleanup = await fsFromJson(
+      {
+        'tsconfig.json': {
+          compilerOptions: {
+            paths: { '@/*': ['./src/*'] },
+            target: 'es2020',
+            module: 'commonjs',
+          },
+          files: ['index.ts'],
+        },
+        'index.ts': 'export const dummy = 42;',
+      },
+      testDir,
+    );
 
-    await expect(
-      deriveTsConfig('/path/to/tsconfig.json'),
-    ).resolves.not.toThrow();
+    const configPath = path.join(testDir, 'tsconfig.json');
+
+    const result = await deriveTsConfig(configPath);
+    expect(result).toEqual(
+      expect.objectContaining({
+        paths: { '@/*': ['./src/*'] },
+        target: 7, // ScriptTarget.ES2020
+        module: 1, // ModuleKind.CommonJS
+      }),
+    );
+
+    await cleanup();
   });
 });

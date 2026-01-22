@@ -1,7 +1,0 @@
-{
-  "compilerOptions": {
-    "rootDir": "./",
-    "verbatimModuleSyntax": false
-  },
-  "include": ["src/**/*", "src/0-no-diagnostics/**/*"]
-}

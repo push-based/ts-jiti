@@ -3,7 +3,7 @@ import { rm } from 'node:fs/promises';
 import path from 'node:path';
 import * as tsModule from 'typescript';
 import { describe, expect, it } from 'vitest';
-import { loadTargetConfig, deriveTsConfig } from './read-ts-config-file.js';
+import { deriveTsConfig, loadTargetConfig } from './read-ts-config-file.js';
 
 const TEST_OUTPUT_BASE = 'packages/jiti-tsc/tmp';
 

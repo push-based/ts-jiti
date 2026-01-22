@@ -1,5 +1,6 @@
 import { vi } from 'vitest';
-import { MEMFS_VOLUME } from '@push-based/test-utils';
+
+const MEMFS_VOLUME = '/test';
 
 vi.mock('simple-git', () => ({
   simpleGit: () => ({

@@ -2,7 +2,6 @@ import type { JitiOptions } from 'jiti';
 import path from 'node:path';
 import type { CompilerOptions } from 'typescript';
 
-
 /**
  * Converts TypeScript paths configuration to jiti alias format
  * @param paths TypeScript paths object from compiler options

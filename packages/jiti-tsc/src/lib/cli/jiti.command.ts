@@ -4,7 +4,6 @@ import { formatCommandStatus } from '../utils/command.js';
 import { executeProcess } from '../utils/execute-process.js';
 import { logger } from '../utils/logger.js';
 
-
 /**
  * Small wrapper to run jiti command line with options derived from tsconfig.
  * - Forwards process env to the jiti command
