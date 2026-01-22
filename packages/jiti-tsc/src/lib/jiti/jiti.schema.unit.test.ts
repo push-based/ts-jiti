@@ -1,9 +1,9 @@
 import type { CompilerOptions } from 'typescript';
+import { expect } from 'vitest';
 import {
   mapTsPathsToJitiAlias,
   parseTsConfigToJitiConfig,
 } from './jiti.schema';
-import { expect } from 'vitest';
 
 describe('mapTsPathsToJitiAlias', () => {
   it('returns empty object when paths is empty', () => {
@@ -72,7 +72,7 @@ describe('mapTsPathsToJitiAlias', () => {
         '/base',
       ),
     ).toStrictEqual({
-      '@': expect.pathToEndWith('src')
+      '@': expect.pathToEndWith('src'),
     });
   });
 });
@@ -97,7 +97,10 @@ describe('parseTsConfigToJitiConfig', () => {
     };
 
     expect(parseTsConfigToJitiConfig(compilerOptions)).toStrictEqual({
-      alias: { '@app': expect.pathToEndWith('src'), '@lib': expect.pathToEndWith('lib') },
+      alias: {
+        '@app': expect.pathToEndWith('src'),
+        '@lib': expect.pathToEndWith('lib'),
+      },
       interopDefault: true,
       sourceMaps: true,
       jsx: true,
