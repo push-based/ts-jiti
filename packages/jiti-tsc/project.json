@@ -1,7 +1,7 @@
 {
   "name": "jiti-tsc",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "tools/jiti-tsc/src",
+  "sourceRoot": "packages/jiti-tsc/src",
   "projectType": "library",
   "tags": ["scope:core", "type:lib", "publishable"],
   "targets": {

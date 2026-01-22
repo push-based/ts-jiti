@@ -16,8 +16,7 @@ import { executeProcess } from '../utils/execute-process.js';
  * @param opts
  */
 export async function jitiCommand(argv: string[]): Promise<void> {
-  const tsconfigPath =
-    process.env[JITI_TSCONFIG_PATH_ENV_VAR] ?? './tsconfig.json';
+  const tsconfigPath = process.env[JITI_TSCONFIG_PATH_ENV_VAR];
 
   const jitiOptions: JitiOptions = tsconfigPath
     ? await jitiOptionsFromTsConfig(tsconfigPath)
