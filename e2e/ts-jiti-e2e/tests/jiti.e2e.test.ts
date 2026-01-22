@@ -66,21 +66,19 @@ console.log('args:', process.argv.slice(2));
 console.log('args:', process.argv.slice(2));`,
       [path.join(d, 'b.ts')]: `export const x = 'load-ts';`,
     });
-    await expect(
-      executeProcess({
-        command: 'npx',
-        args: [
-          '@push-based/jiti-tsc',
-          path.relative(envRoot, path.join(d, 'a.js')),
-          '--load-arg=test',
-        ],
-        cwd: envRoot,
-        silent: true,
-      }),
-    ).resolves.toMatchObject({
-      code: 0,
-      stdout: expect.stringContaining("args: [ '--load-arg=test' ]"),
+    const { code, stdout } = await executeProcess({
+      command: 'npx',
+      args: [
+        '@push-based/jiti-tsc',
+        path.relative(envRoot, path.join(d, 'a.js')),
+        '--load-arg=test',
+      ],
+      cwd: envRoot,
+      silent: true,
     });
+
+    expect(code).toBe(0);
+    expect(stdout).toContain("args: [ '--load-arg=test' ]");
     await cleanup();
   });
 
@@ -90,21 +88,19 @@ console.log('args:', process.argv.slice(2));`,
       [path.join(d, 'a.ts')]: `console.log('exec-ts');
 console.log('args:', process.argv.slice(2));`,
     });
-    await expect(
-      executeProcess({
-        command: 'npx',
-        args: [
-          '@push-based/jiti-tsc',
-          path.relative(envRoot, path.join(d, 'a.ts')),
-          '--exec-arg=value',
-        ],
-        cwd: envRoot,
-        silent: true,
-      }),
-    ).resolves.toMatchObject({
-      code: 0,
-      stdout: expect.stringContaining("args: [ '--exec-arg=value' ]"),
+    const { code, stdout } = await executeProcess({
+      command: 'npx',
+      args: [
+        '@push-based/jiti-tsc',
+        path.relative(envRoot, path.join(d, 'a.ts')),
+        '--exec-arg=value',
+      ],
+      cwd: envRoot,
+      silent: true,
     });
+
+    expect(code).toBe(0);
+    expect(stdout).toContain("args: [ '--exec-arg=value' ]");
     await cleanup();
   });
 
@@ -115,21 +111,19 @@ console.log('args:', process.argv.slice(2));`,
 console.log('args:', process.argv.slice(2));`,
       [path.join(d, 'b.ts')]: `export const x = 'exec-ts-load-ts';`,
     });
-    await expect(
-      executeProcess({
-        command: 'npx',
-        args: [
-          '@push-based/jiti-tsc',
-          path.relative(envRoot, path.join(d, 'a.ts')),
-          '--load-ts-arg=hello',
-        ],
-        cwd: envRoot,
-        silent: true,
-      }),
-    ).resolves.toMatchObject({
-      code: 0,
-      stdout: expect.stringContaining("args: [ '--load-ts-arg=hello' ]"),
+    const { code, stdout } = await executeProcess({
+      command: 'npx',
+      args: [
+        '@push-based/jiti-tsc',
+        path.relative(envRoot, path.join(d, 'a.ts')),
+        '--load-ts-arg=hello',
+      ],
+      cwd: envRoot,
+      silent: true,
     });
+
+    expect(code).toBe(0);
+    expect(stdout).toContain("args: [ '--load-ts-arg=hello' ]");
     await cleanup();
   });
 
@@ -143,25 +137,23 @@ console.log('args:', process.argv.slice(2));`,
 console.log('args:', process.argv.slice(2));`,
       [path.join(d, 'b.ts')]: `export const x = 'exec-ts-tsconfig-load-ts';`,
     });
-    await expect(
-      executeProcess({
-        command: 'npx',
-        args: [
-          '@push-based/jiti-tsc',
-          path.relative(envRoot, path.join(d, 'a.ts')),
-          '--tsconfig-arg=path-test',
-        ],
-        cwd: envRoot,
-        env: {
-          ...process.env,
-          JITI_TSCONFIG_PATH: path.resolve(path.join(d, 'tsconfig.json')),
-        },
-        silent: true,
-      }),
-    ).resolves.toMatchObject({
-      code: 0,
-      stdout: expect.stringContaining("args: [ '--tsconfig-arg=path-test' ]"),
+    const { code, stdout } = await executeProcess({
+      command: 'npx',
+      args: [
+        '@push-based/jiti-tsc',
+        path.relative(envRoot, path.join(d, 'a.ts')),
+        '--tsconfig-arg=path-test',
+      ],
+      cwd: envRoot,
+      env: {
+        ...process.env,
+        JITI_TSCONFIG_PATH: path.resolve(path.join(d, 'tsconfig.json')),
+      },
+      silent: true,
     });
+
+    expect(code).toBe(0);
+    expect(stdout).toContain("args: [ '--tsconfig-arg=path-test' ]");
     await cleanup();
   });
 
@@ -177,25 +169,23 @@ console.log('args:', process.argv.slice(2));`,
       [path.join(d, 'c.ts')]:
         `export const y = 'exec-ts-tsconfig-load-ts-tsconfig';`,
     });
-    await expect(
-      executeProcess({
-        command: 'npx',
-        args: [
-          '@push-based/jiti-tsc',
-          path.relative(envRoot, path.join(d, 'a.ts')),
-          '--complex-arg=multi-file',
-        ],
-        cwd: envRoot,
-        env: {
-          ...process.env,
-          JITI_TSCONFIG_PATH: path.resolve(path.join(d, 'tsconfig.json')),
-        },
-        silent: true,
-      }),
-    ).resolves.toMatchObject({
-      code: 0,
-      stdout: expect.stringContaining("args: [ '--complex-arg=multi-file' ]"),
+    const { code, stdout } = await executeProcess({
+      command: 'npx',
+      args: [
+        '@push-based/jiti-tsc',
+        path.relative(envRoot, path.join(d, 'a.ts')),
+        '--complex-arg=multi-file',
+      ],
+      cwd: envRoot,
+      env: {
+        ...process.env,
+        JITI_TSCONFIG_PATH: path.resolve(path.join(d, 'tsconfig.json')),
+      },
+      silent: true,
     });
+
+    expect(code).toBe(0);
+    expect(stdout).toContain("args: [ '--complex-arg=multi-file' ]");
     await cleanup();
   });
 
@@ -217,13 +207,13 @@ console.log('args:', process.argv.slice(2));
       cwd: envRoot,
       silent: true,
       env: {
-        NODE_OPTIONS: '--import jiti-tsc',
+        NODE_OPTIONS: '--import @push-based/jiti-tsc',
       },
     });
 
     expect(code).toBe(0);
     expect(stdout).toContain('Executed over --import jiti-tsc');
-    expect(stdout).toContain('args: ["--myArg=42"]');
+    expect(stdout).toContain("args: [ '--myArg=42' ]");
 
     await cleanup();
   });
