@@ -6,6 +6,7 @@ import {
 } from '@push-based/test-utils';
 import { createJiti } from 'jiti';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import type { TsConfigJson } from 'type-fest';
 import { describe, expect, it } from 'vitest';
 import { importModule, jitiOptionsFromTsConfig } from './jiti.js';
@@ -58,7 +59,7 @@ describe('jiti', () => {
     // Expected: file://<workspace>/tmp/int/jiti-tsc/__test__/jiti-esm-resolve/test.mjs
     const expectedPath = `file://${path.resolve(baseFolder, 'test.mjs')}`;
 
-    expect(resolvedPath).toBe(expectedPath);
+    expect(resolvedPath).toMatchPath(expectedPath);
 
     await cleanup();
   });
@@ -85,9 +86,9 @@ describe('jiti', () => {
     // Test that alias resolution works with esmResolve
     const resolvedPath = j.esmResolve('@utils/helper.mjs', baseFolder);
     // Expected: file://<workspace>/tmp/int/jiti-tsc/__test__/jiti-esm-resolve-alias/utils/helper.mjs
-    const expectedPath = `file://${path.resolve(baseFolder, 'utils', 'helper.mjs')}`;
+    const expectedPath = pathToFileURL(path.resolve(baseFolder, 'utils', 'helper.mjs')).href;
 
-    expect(resolvedPath).toEndWithPath(expectedPath);
+    expect(resolvedPath).toBe(expectedPath);
 
     await cleanup();
   });
