@@ -54,7 +54,7 @@ console.log('args:', process.argv.slice(2));
 
     expect(code).toBe(0);
     expect(stdout).toContain('Executed over jiti-tsc');
-    expect(stdout).toContain("args: [ '--test-arg=123' ]");
+    expect(stdout).toBe("args: [ '--test-arg=123' ]");
 
     await cleanup();
   });
@@ -78,7 +78,7 @@ console.log('args:', process.argv.slice(2));`,
     });
 
     expect(code).toBe(0);
-    expect(stdout).toContain("args: [ '--load-arg=test' ]");
+    expect(stdout).toBe("args: [ '--load-arg=test' ]");
     await cleanup();
   });
 
@@ -100,7 +100,7 @@ console.log('args:', process.argv.slice(2));`,
     });
 
     expect(code).toBe(0);
-    expect(stdout).toContain("args: [ '--exec-arg=value' ]");
+    expect(stdout).toBe("args: [ '--exec-arg=value' ]");
     await cleanup();
   });
 
@@ -123,7 +123,7 @@ console.log('args:', process.argv.slice(2));`,
     });
 
     expect(code).toBe(0);
-    expect(stdout).toContain("args: [ '--load-ts-arg=hello' ]");
+    expect(stdout).toBe("args: [ '--load-ts-arg=hello' ]");
     await cleanup();
   });
 
@@ -153,7 +153,7 @@ console.log('args:', process.argv.slice(2));`,
     });
 
     expect(code).toBe(0);
-    expect(stdout).toContain("args: [ '--tsconfig-arg=path-test' ]");
+    expect(stdout).toBe("args: [ '--tsconfig-arg=path-test' ]");
     await cleanup();
   });
 
@@ -185,7 +185,7 @@ console.log('args:', process.argv.slice(2));`,
     });
 
     expect(code).toBe(0);
-    expect(stdout).toContain("args: [ '--complex-arg=multi-file' ]");
+    expect(stdout).toBe("args: [ '--complex-arg=multi-file' ]");
     await cleanup();
   });
 
