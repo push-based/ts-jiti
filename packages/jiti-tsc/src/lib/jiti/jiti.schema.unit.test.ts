@@ -16,19 +16,19 @@ describe('mapTsPathsToJitiAlias', () => {
 
   it('maps single path pattern without wildcards', () => {
     expect(mapTsPathsToJitiAlias({ '@': ['src'] }, '/base')).toStrictEqual({
-      '@': '/base/src',
+      '@': expect.toMatchPath('/base/src'),
     });
   });
 
   it('strips /* from path pattern and mapping', () => {
     expect(mapTsPathsToJitiAlias({ '@/*': ['src/*'] }, '/base')).toStrictEqual({
-      '@': '/base/src',
+      '@': expect.toMatchPath('/base/src'),
     });
   });
 
   it('resolves relative path mappings to absolute', () => {
     expect(mapTsPathsToJitiAlias({ '@/*': ['src/*'] }, '/app')).toStrictEqual({
-      '@': '/app/src',
+      '@': expect.toMatchPath('/app/src'),
     });
   });
 
@@ -56,8 +56,8 @@ describe('mapTsPathsToJitiAlias', () => {
         '/base',
       ),
     ).toStrictEqual({
-      '@': '/base/src',
-      '~': '/base/lib',
+      '@': expect.toMatchPath('/base/src'),
+      '~': expect.toMatchPath('/base/lib'),
     });
   });
 
