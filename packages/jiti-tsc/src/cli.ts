@@ -9,14 +9,18 @@ if (!file) {
   process.exit(1);
 }
 
-const child = spawn(process.execPath, [file, ...rest], {
-  stdio: 'inherit',
-  env: {
-    ...process.env,
-    NODE_OPTIONS: [process.env['NODE_OPTIONS'], '--import @push-based/jiti-tsc']
-      .filter(Boolean)
-      .join(' '),
+const child = spawn(
+  process.execPath,
+  [
+    '--import',
+    '@push-based/jiti-tsc',
+    file,
+    ...rest,
+  ],
+  {
+    stdio: 'inherit',
+    env: process.env,
   },
-});
-// eslint-disable-next-line n/no-process-exit
+);
+
 child.on('exit', code => process.exit(code ?? 1));
