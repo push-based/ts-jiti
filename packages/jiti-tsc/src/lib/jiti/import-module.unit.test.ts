@@ -1,9 +1,9 @@
 import type { CompilerOptions } from 'typescript';
-import { expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
   mapTsPathsToJitiAlias,
   parseTsConfigToJitiConfig,
-} from './jiti.schema';
+} from './import-module.js';
 
 describe('mapTsPathsToJitiAlias', () => {
   it('returns empty object when paths is empty', () => {

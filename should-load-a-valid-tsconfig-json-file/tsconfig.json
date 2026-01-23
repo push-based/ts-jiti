@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "@app/*": ["src/*"],
+      "@lib/*": ["lib/*"]
+    },
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "jsx": "react"
+  },
+  "include": ["**/*.ts"]
+}
