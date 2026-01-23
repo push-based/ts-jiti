@@ -1,3 +1,14 @@
+## 0.1.0 (2026-01-23)
+
+### 🚀 Features
+
+- add --import feature ([a2e8e83](https://github.com/push-based/ts-jiti/commit/a2e8e83))
+- add --import mode ([fead613](https://github.com/push-based/ts-jiti/commit/fead613))
+
+### ❤️ Thank You
+
+- Michael Hladky @BioPhoton
+
 ## 0.0.2 (2025-12-21)
 
 ### 🩹 Fixes
