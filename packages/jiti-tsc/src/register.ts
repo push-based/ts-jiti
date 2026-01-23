@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { JITI_TSCONFIG_PATH_ENV_VAR } from './lib/jiti/constants.js';
-import { jitiOptionsFromTsConfig } from './lib/jiti/jiti.js';
+import { jitiOptionsFromTsConfig } from './lib/jiti/import-module.js';
 import { jitiOptionsToEnv } from './lib/jiti/jiti.schema.js';
 
 /**
