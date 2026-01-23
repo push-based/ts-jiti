@@ -27,5 +27,6 @@ export async function registerJitiTsconfig() {
     );
   }
 
+  // @ts-ignore - jiti/register is a side-effect import
   await import('jiti/register');
 }
