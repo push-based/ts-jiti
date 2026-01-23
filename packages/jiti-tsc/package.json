@@ -34,7 +34,6 @@
     "jiti",
     "tsconfig",
     "path-aliases",
-    "monorepo",
     "module-resolution"
   ],
   "files": [
