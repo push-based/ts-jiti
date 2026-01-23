@@ -3,8 +3,8 @@ import { stat } from 'node:fs/promises';
 import path from 'node:path';
 import type { CompilerOptions } from 'typescript';
 import { fileExists } from '../utils/file-system.js';
-import { loadTargetConfig } from './load-ts-config.js';
 import { settlePromise } from '../utils/promises.js';
+import { loadTargetConfig } from './load-ts-config.js';
 
 // For unknown reason, we can't import `JitiOptions` directly in this repository
 type JitiOptions = Exclude<Parameters<typeof createJitiSource>[1], undefined>;

@@ -1,6 +1,6 @@
+import { osAgnosticPath } from '@push-based/test-utils';
 import * as tsModule from 'typescript';
 import { describe, expect, vi } from 'vitest';
-import { osAgnosticPath } from '@push-based/test-utils';
 import { loadTargetConfig } from './load-ts-config.js';
 
 describe('loadTargetConfig', () => {
