@@ -16,17 +16,16 @@ export async function registerJitiTsconfig() {
     const jitiOptions = await jitiOptionsFromTsConfig(tsconfigPath);
     const envVars = jitiOptionsToEnv(jitiOptions);
 
-    for (const [key, value] of Object.entries(envVars)) {
-      if (value !== undefined) {
-        process.env[key] = value;
-      }
-    }
-  } catch (error) {
+    Object.entries(envVars).forEach(
+      // eslint-disable-next-line functional/immutable-data
+      ([k, v]) => v != null && (process.env[k] = v)
+    );
+  } catch {
     console.warn(
       `[jiti-tsc] Failed to load tsconfig from ${tsconfigPath}, continuing without tsconfig`,
     );
   }
 
-  // @ts-ignore - jiti/register is a side-effect import
+  // @ts-expect-error - jiti/register is a side-effect import
   await import('jiti/register');
 }
