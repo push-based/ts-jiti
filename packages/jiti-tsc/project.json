@@ -33,12 +33,27 @@
         ]
       }
     },
-    "demo": {
+    "cli-test": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "nx run @push-based/jiti-tsc --inputFile=./tools/jiti-tsc/demo/input-schema.ts --outputFile=./tools/jiti-tsc/demo/output-schema.ts"
+        "command": "node dist/src/cli.js tools/test-app.ts",
+        "cwd": "{projectRoot}",
+        "env": {
+          "JITI_TSCONFIG_PATH": "tools/tsconfig.json"
+        }
       },
       "dependsOn": ["build"]
+    },
+    "import-test": {
+      "dependsOn": ["build"],
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node dist/src/cli.js tools/cli.ts",
+        "cwd": "{projectRoot}",
+        "env": {
+          "JITI_TSCONFIG_PATH": "tools/tsconfig.json"
+        }
+      }
     }
   }
 }
