@@ -1,3 +1,13 @@
+## 0.1.1 (2026-01-23)
+
+### 🩹 Fixes
+
+- update docs ([e0907c8](https://github.com/push-based/ts-jiti/commit/e0907c8))
+
+### ❤️ Thank You
+
+- Michael Hladky @rx-angular
+
 ## 0.1.0 (2026-01-23)
 
 ### 🚀 Features
