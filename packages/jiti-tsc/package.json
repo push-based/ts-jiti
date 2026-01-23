@@ -9,6 +9,10 @@
     ".": {
       "import": "./src/index.js",
       "types": "./src/index.d.ts"
+    },
+    "./jiti-tsc": {
+      "import": "./src/index.js",
+      "types": "./src/index.d.ts"
     }
   },
   "bin": {

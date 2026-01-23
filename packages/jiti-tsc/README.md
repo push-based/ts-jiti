@@ -21,34 +21,14 @@ npm install @push-based/jiti-tsc
 
 ## Quick Start
 
-### Using with Node.js `--import` Flag
-
-You can use `jiti-tsc` as a global ESM loader with Node.js's `--import` flag. This allows you to run TypeScript files directly with tsconfig path alias support.
-
-**Requirements:**
-
-- Node.js 20 or higher
-- Your project must use ESM (`"type": "module"` in `package.json` or `.mjs` files)
-
 **Usage:**
 
 ```bash
-# Via NODE_OPTIONS environment variable
-NODE_OPTIONS="--import jiti-tsc/register" node your-file.ts
+# Capability mode (automatic)
+NODE_OPTIONS="--import jiti-tsc" node file.ts
 
-# Or directly with node command
-node --import jiti-tsc/register your-file.ts
-```
-
-**In package.json scripts:**
-
-```json
-{
-  "type": "module",
-  "scripts": {
-    "dev": "NODE_OPTIONS=\"--import jiti-tsc/register\" node src/index.ts"
-  }
-}
+# Runner mode (CLI)
+npx jiti-tsc file.ts
 ```
 
 **With custom tsconfig path:**
