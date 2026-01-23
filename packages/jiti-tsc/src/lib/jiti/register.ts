@@ -32,9 +32,9 @@ export async function registerJitiTsconfig() {
     if (process.env['JITI_DEBUG']) {
       console.log('[jiti-tsc] NODE_OPTIONS:', process.env['NODE_OPTIONS']);
       console.log('[jiti-tsc] JITI_* env vars:');
-        Object.entries(process.env)
-          .filter(([k]) => k.startsWith('JITI_'))
-          .forEach(([k,v]) => console.log(k,v))
+      Object.entries(process.env)
+        .filter(([k]) => k.startsWith('JITI_'))
+        .forEach(([k, v]) => console.log(k, v));
     }
   } catch {
     console.warn(

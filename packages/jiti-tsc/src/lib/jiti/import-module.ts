@@ -93,7 +93,10 @@ export const mapTsJsxToJitiJsx = (tsJsxMode: number): boolean =>
  * | jsx               | boolean                 | jsx                   | JsxEmit (0-5)           | TS JsxEmit enum (0-5) => boolean JSX processing. |
  */
 export type MappableJitiOptions = Partial<
-  Pick<JitiOptions, 'alias' | 'interopDefault' | 'sourceMaps' | 'jsx' | 'nativeModules'>
+  Pick<
+    JitiOptions,
+    'alias' | 'interopDefault' | 'sourceMaps' | 'jsx' | 'nativeModules'
+  >
 >;
 /**
  * Parse TypeScript compiler options to mappable jiti options
