@@ -14,12 +14,28 @@ export async function registerJitiTsconfig() {
 
   try {
     const jitiOptions = await jitiOptionsFromTsConfig(tsconfigPath);
+    // Add semver and other problematic modules to nativeModules to avoid Node.js v24 issues
+    jitiOptions.nativeModules = [
+      ...(jitiOptions.nativeModules || []),
+      'semver',
+      'semver/classes/range',
+      'semver/classes/comparator',
+    ];
     const envVars = jitiOptionsToEnv(jitiOptions);
 
     Object.entries(envVars).forEach(
       // eslint-disable-next-line functional/immutable-data
       ([k, v]) => v != null && (process.env[k] = v),
     );
+
+    // Debug logging when JITI_DEBUG is enabled
+    if (process.env['JITI_DEBUG']) {
+      console.log('[jiti-tsc] NODE_OPTIONS:', process.env['NODE_OPTIONS']);
+      console.log('[jiti-tsc] JITI_* env vars:');
+        Object.entries(process.env)
+          .filter(([k]) => k.startsWith('JITI_'))
+          .forEach(([k,v]) => console.log(k,v))
+    }
   } catch {
     console.warn(
       `[jiti-tsc] Failed to load tsconfig from ${tsconfigPath}, continuing without tsconfig`,

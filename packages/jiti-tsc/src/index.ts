@@ -11,6 +11,7 @@ if (process.env['npm_execpath']) {
 try {
   await registerJitiTsconfig();
 } catch (error) {
-  console.error('[jiti-tsc] Failed to register:', error);
-  throw error;
+  // If registration fails (e.g., when not loaded as --import), try to handle gracefully
+  console.warn('[jiti-tsc] Registration failed, continuing without TypeScript support:', error instanceof Error ? error.message : String(error));
+  // Don't throw - allow the process to continue
 }
