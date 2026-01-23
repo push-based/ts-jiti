@@ -1,23 +1,13 @@
 {
   "name": "jiti-tsc",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "tools/jiti-tsc/src",
+  "sourceRoot": "packages/jiti-tsc/src",
   "projectType": "library",
   "tags": ["scope:core", "type:lib", "publishable"],
   "targets": {
     "lint": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "eslint",
-        "args": [
-          "'{projectRoot}/src/**/*.ts'",
-          "{projectRoot}/package.json",
-          "--config={projectRoot}/eslint.config.js",
-          "--max-warnings=0",
-          "--no-warn-ignored",
-          "--error-on-unmatched-pattern=false"
-        ]
-      }
+      "executor": "@nx/eslint:lint",
+      "inputs": ["lint-eslint-inputs"]
     },
     "unit-test": {},
     "int-test": {},

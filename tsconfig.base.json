@@ -20,7 +20,7 @@
     "allowSyntheticDefaultImports": true,
     "verbatimModuleSyntax": true,
     "paths": {
-      "@push-based/jiti-tsc": ["packages/ts-jiti/src/index.ts"],
+      "@push-based/jiti-tsc": ["packages/jiti-tsc/src/index.ts"],
       "@push-based/test-nx-utils": ["testing/test-nx-utils/src/index.ts"],
       "@push-based/test-setup": ["testing/test-setup/src/index.ts"],
       "@push-based/test-setup-config": [

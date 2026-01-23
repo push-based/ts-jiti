@@ -1,8 +1,8 @@
 {
   "extends": "./tsconfig.extends-base.json",
   "compilerOptions": {
-    "module": "commonjs",
-    "verbatimModuleSyntax": true
+    "verbatimModuleSyntax": true,
+    "module": "CommonJS"
   },
-  "exclude": ["src/some-other-dir"]
+  "exclude": ["src/*-errors/**/*.ts"]
 }
