@@ -18,7 +18,7 @@ export async function registerJitiTsconfig() {
 
     Object.entries(envVars).forEach(
       // eslint-disable-next-line functional/immutable-data
-      ([k, v]) => v != null && (process.env[k] = v)
+      ([k, v]) => v != null && (process.env[k] = v),
     );
   } catch {
     console.warn(

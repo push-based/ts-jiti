@@ -14,10 +14,6 @@ if (!file) {
 await registerJitiTsconfig();
 
 // spawn node
-const child = spawn(
-  process.execPath,
-  [file, ...rest],
-  { stdio: 'inherit' },
-);
+const child = spawn(process.execPath, [file, ...rest], { stdio: 'inherit' });
 // eslint-disable-next-line n/no-process-exit
 child.on('exit', code => process.exit(code ?? 1));
