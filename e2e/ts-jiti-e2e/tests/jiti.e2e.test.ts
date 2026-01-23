@@ -1,4 +1,4 @@
-import { executeProcess } from '@push-based/jiti-tsc';
+import { executeProcess } from '@push-based/test-utils';
 import { nxTargetProject } from '@push-based/test-nx-utils';
 import {
   E2E_ENVIRONMENTS_DIR,
