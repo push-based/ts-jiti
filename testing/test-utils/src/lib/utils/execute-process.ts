@@ -168,11 +168,8 @@ export function executeProcess(cfg: ProcessConfig): Promise<ProcessResult> {
         ...options,
       }) as ChildProcessByStdio<Writable, Readable, Readable>;
 
-      // eslint-disable-next-line functional/no-let
       let stdout = '';
-      // eslint-disable-next-line functional/no-let
       let stderr = '';
-      // eslint-disable-next-line functional/no-let
       let output = ''; // interleaved stdout and stderr
 
       spawnedProcess.stdout.on('data', (data: unknown) => {

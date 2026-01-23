@@ -1,8 +1,8 @@
-import { executeProcess } from '@push-based/test-utils';
 import { nxTargetProject } from '@push-based/test-nx-utils';
 import {
   E2E_ENVIRONMENTS_DIR,
   TEST_OUTPUT_DIR,
+  executeProcess,
   fsFromJson,
 } from '@push-based/test-utils';
 import path from 'node:path';
