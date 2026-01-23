@@ -1,6 +1,8 @@
-export { runCli } from './lib/cli/cli.js';
+import { registerJitiTsconfig } from './lib/jiti/register.js';
 
-export * from './lib/jiti/constants.js';
-export { importModule, createTsJiti } from './lib/jiti/import-module.js';
-export { executeProcess } from './lib/utils/execute-process.js';
-export { tsconfig } from './lib/cli/constant.js';
+try {
+  await registerJitiTsconfig();
+} catch (error) {
+  console.error('[jiti-tsc] Failed to register:', error);
+  throw error;
+}
