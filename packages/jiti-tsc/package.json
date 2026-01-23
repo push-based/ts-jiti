@@ -34,7 +34,8 @@
     "jiti",
     "tsconfig",
     "path-aliases",
-    "module-resolution"
+    "module-resolution",
+    "dynamic-import"
   ],
   "files": [
     "src/*",
