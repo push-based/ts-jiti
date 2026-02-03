@@ -4,10 +4,10 @@ import {
   TEST_OUTPUT_DIR,
   executeProcess,
   fsFromJson,
+  removeColorCodes,
 } from '@push-based/test-utils';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import stripAnsi from 'strip-ansi';
 import { expect } from 'vitest';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -18,6 +18,42 @@ const toSlug = (str: string): string =>
     .toLowerCase()
     .replace(/\s+/g, '-')
     .replace(/[^a-z\d-]/g, '');
+
+const binJitiTscContent = `#!/usr/bin/env node
+console.log(\`Executed over jiti-tsc\`);
+console.log('args:', process.argv.slice(2));
+`;
+
+const binImportJitiTscContent = `#!/usr/bin/env node
+console.log(\`Executed over --import jiti-tsc\`);
+console.log('args:', process.argv.slice(2));
+`;
+
+const loadTsAContent = `import { x } from './b.ts'; console.log(x);
+console.log('args:', process.argv.slice(2));`;
+
+const loadTsBContent = `export const x = 'load-ts';`;
+
+const execTsAContent = `console.log('exec-ts');
+console.log('args:', process.argv.slice(2));`;
+
+const execTsLoadTsAContent = `import { x } from './b.js'; console.log(x);
+console.log('args:', process.argv.slice(2));`;
+
+const execTsLoadTsBContent = `export const x = 'exec-ts-load-ts';`;
+
+const tsconfigPathAContent = `import { x } from '@/b.js'; console.log(x);
+console.log('args:', process.argv.slice(2));`;
+
+const tsconfigPathBContent = `export const x = 'exec-ts-tsconfig-load-ts';`;
+
+const tsconfigPathComplexBContent = `import { y } from '@/c.js'; export const x = y;`;
+
+const tsconfigPathComplexCContent = `export const y = 'exec-ts-tsconfig-load-ts-tsconfig';`;
+
+const tsconfigPathContent = {
+  compilerOptions: { baseUrl: '.', paths: { '@/*': ['./*'] } },
+};
 
 describe('CLI jiti', () => {
   const envRoot = path.join(E2E_ENVIRONMENTS_DIR, nxTargetProject());
@@ -36,13 +72,10 @@ describe('CLI jiti', () => {
   it('should execute ts file with jiti-tsc', async () => {
     const baseFolder = getTestDir('exec-jiti-tsc');
     const cleanup = await fsFromJson({
-      [path.join(baseFolder, 'bin.ts')]: `#!/usr/bin/env node
-console.log(\`Executed over jiti-tsc\`);
-console.log('args:', process.argv.slice(2));
-`,
+      [path.join(baseFolder, 'bin.ts')]: binJitiTscContent,
     });
 
-    const { code, stdout } = await executeProcess({
+    const { code, stdout, stderr } = await executeProcess({
       command: 'npx',
       args: [
         '@push-based/jiti-tsc',
@@ -54,8 +87,12 @@ console.log('args:', process.argv.slice(2));
     });
 
     expect(code).toBe(0);
-    expect(stripAnsi(stdout)).toContain('Executed over jiti-tsc');
-    expect(stripAnsi(stdout)).toContain("args: [ '--test-arg=123' ]");
+    expect(removeColorCodes(stdout) + removeColorCodes(stderr)).toContain(
+      'Executed over jiti-tsc',
+    );
+    expect(removeColorCodes(stdout) + removeColorCodes(stderr)).toContain(
+      "args: [ '--test-arg=123' ]",
+    );
 
     await cleanup();
   });
@@ -63,15 +100,14 @@ console.log('args:', process.argv.slice(2));
   it('should load .ts', async () => {
     const d = getTestDir('load-ts');
     const cleanup = await fsFromJson({
-      [path.join(d, 'a.js')]: `import { x } from './b.ts'; console.log(x);
-console.log('args:', process.argv.slice(2));`,
-      [path.join(d, 'b.ts')]: `export const x = 'load-ts';`,
+      [path.join(d, 'a.ts')]: loadTsAContent,
+      [path.join(d, 'b.ts')]: loadTsBContent,
     });
-    const { code, stdout } = await executeProcess({
+    const { code, stdout, stderr } = await executeProcess({
       command: 'npx',
       args: [
         '@push-based/jiti-tsc',
-        path.relative(envRoot, path.join(d, 'a.js')),
+        path.relative(envRoot, path.join(d, 'a.ts')),
         '--load-arg=test',
       ],
       cwd: envRoot,
@@ -79,17 +115,18 @@ console.log('args:', process.argv.slice(2));`,
     });
 
     expect(code).toBe(0);
-    expect(stripAnsi(stdout)).toContain("args: [ '--load-arg=test' ]");
+    expect(removeColorCodes(stdout) + removeColorCodes(stderr)).toContain(
+      "args: [ '--load-arg=test' ]",
+    );
     await cleanup();
   });
 
   it('should exec .ts', async () => {
     const d = getTestDir('exec-ts');
     const cleanup = await fsFromJson({
-      [path.join(d, 'a.ts')]: `console.log('exec-ts');
-console.log('args:', process.argv.slice(2));`,
+      [path.join(d, 'a.ts')]: execTsAContent,
     });
-    const { code, stdout } = await executeProcess({
+    const { code, stdout, stderr } = await executeProcess({
       command: 'npx',
       args: [
         '@push-based/jiti-tsc',
@@ -101,18 +138,19 @@ console.log('args:', process.argv.slice(2));`,
     });
 
     expect(code).toBe(0);
-    expect(stripAnsi(stdout)).toContain("args: [ '--exec-arg=value' ]");
+    expect(removeColorCodes(stdout) + removeColorCodes(stderr)).toContain(
+      "args: [ '--exec-arg=value' ]",
+    );
     await cleanup();
   });
 
   it('should exec .ts loading .ts', async () => {
     const d = getTestDir('exec-ts-load-ts');
     const cleanup = await fsFromJson({
-      [path.join(d, 'a.ts')]: `import { x } from './b.js'; console.log(x);
-console.log('args:', process.argv.slice(2));`,
-      [path.join(d, 'b.ts')]: `export const x = 'exec-ts-load-ts';`,
+      [path.join(d, 'a.ts')]: execTsLoadTsAContent,
+      [path.join(d, 'b.ts')]: execTsLoadTsBContent,
     });
-    const { code, stdout } = await executeProcess({
+    const { code, stdout, stderr } = await executeProcess({
       command: 'npx',
       args: [
         '@push-based/jiti-tsc',
@@ -124,21 +162,20 @@ console.log('args:', process.argv.slice(2));`,
     });
 
     expect(code).toBe(0);
-    expect(stripAnsi(stdout)).toContain("args: [ '--load-ts-arg=hello' ]");
+    expect(removeColorCodes(stdout) + removeColorCodes(stderr)).toContain(
+      "args: [ '--load-ts-arg=hello' ]",
+    );
     await cleanup();
   });
 
   it('should exec .ts with tsconfig.path loading .ts', async () => {
     const d = getTestDir('exec-ts-tsconfig-load-ts');
     const cleanup = await fsFromJson({
-      [path.join(d, 'tsconfig.json')]: {
-        compilerOptions: { baseUrl: '.', paths: { '@/*': ['./*'] } },
-      },
-      [path.join(d, 'a.ts')]: `import { x } from '@/b.js'; console.log(x);
-console.log('args:', process.argv.slice(2));`,
-      [path.join(d, 'b.ts')]: `export const x = 'exec-ts-tsconfig-load-ts';`,
+      [path.join(d, 'tsconfig.json')]: tsconfigPathContent,
+      [path.join(d, 'a.ts')]: tsconfigPathAContent,
+      [path.join(d, 'b.ts')]: tsconfigPathBContent,
     });
-    const { code, stdout } = await executeProcess({
+    const { code, stdout, stderr } = await executeProcess({
       command: 'npx',
       args: [
         '@push-based/jiti-tsc',
@@ -154,23 +191,21 @@ console.log('args:', process.argv.slice(2));`,
     });
 
     expect(code).toBe(0);
-    expect(stripAnsi(stdout)).toContain("args: [ '--tsconfig-arg=path-test' ]");
+    expect(removeColorCodes(stdout) + removeColorCodes(stderr)).toContain(
+      "args: [ '--tsconfig-arg=path-test' ]",
+    );
     await cleanup();
   });
 
   it('should exec .ts with tsconfig.path loading .ts with tsconfig.path', async () => {
     const d = getTestDir('exec-ts-tsconfig-load-ts-tsconfig');
     const cleanup = await fsFromJson({
-      [path.join(d, 'tsconfig.json')]: {
-        compilerOptions: { baseUrl: '.', paths: { '@/*': ['./*'] } },
-      },
-      [path.join(d, 'a.ts')]: `import { x } from '@/b.js'; console.log(x);
-console.log('args:', process.argv.slice(2));`,
-      [path.join(d, 'b.ts')]: `import { y } from '@/c.js'; export const x = y;`,
-      [path.join(d, 'c.ts')]:
-        `export const y = 'exec-ts-tsconfig-load-ts-tsconfig';`,
+      [path.join(d, 'tsconfig.json')]: tsconfigPathContent,
+      [path.join(d, 'a.ts')]: tsconfigPathAContent,
+      [path.join(d, 'b.ts')]: tsconfigPathComplexBContent,
+      [path.join(d, 'c.ts')]: tsconfigPathComplexCContent,
     });
-    const { code, stdout } = await executeProcess({
+    const { code, stdout, stderr } = await executeProcess({
       command: 'npx',
       args: [
         '@push-based/jiti-tsc',
@@ -186,20 +221,19 @@ console.log('args:', process.argv.slice(2));`,
     });
 
     expect(code).toBe(0);
-    expect(stripAnsi(stdout)).toContain("args: [ '--complex-arg=multi-file' ]");
+    expect(removeColorCodes(stdout) + removeColorCodes(stderr)).toContain(
+      "args: [ '--complex-arg=multi-file' ]",
+    );
     await cleanup();
   });
 
   it('should execute ts file with --import jiti-tsc', async () => {
     const baseFolder = getTestDir('exec-jiti-tsc');
     const cleanup = await fsFromJson({
-      [path.join(baseFolder, 'bin.ts')]: `#!/usr/bin/env node
-console.log(\`Executed over --import jiti-tsc\`);
-console.log('args:', process.argv.slice(2));
-`,
+      [path.join(baseFolder, 'bin.ts')]: binImportJitiTscContent,
     });
 
-    const { code, stdout } = await executeProcess({
+    const { code, stdout, stderr } = await executeProcess({
       command: process.execPath,
       args: [
         path.relative(envRoot, path.join(baseFolder, 'bin.ts')),
@@ -213,8 +247,12 @@ console.log('args:', process.argv.slice(2));
     });
 
     expect(code).toBe(0);
-    expect(stripAnsi(stdout)).toContain('Executed over --import jiti-tsc');
-    expect(stripAnsi(stdout)).toContain("args: [ '--myArg=42' ]");
+    expect(removeColorCodes(stdout) + removeColorCodes(stderr)).toContain(
+      'Executed over --import jiti-tsc',
+    );
+    expect(removeColorCodes(stdout) + removeColorCodes(stderr)).toContain(
+      "args: [ '--myArg=42' ]",
+    );
 
     await cleanup();
   });

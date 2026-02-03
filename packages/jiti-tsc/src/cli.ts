@@ -19,7 +19,6 @@ const isFile =
   /\.(ts|tsx|mts|cts)$/.test(cmd);
 
 if (isFile) {
-  // ✅ TypeScript file: Use --import to enable jiti-tsc TypeScript support
   const child = spawn(
     process.execPath,
     ['--import', '@push-based/jiti-tsc', cmd, ...rest],
@@ -27,10 +26,9 @@ if (isFile) {
   );
   child.on('exit', code => process.exit(code ?? 1));
 } else {
-  // ✅ Shell command: Run directly with shell support for npm scripts/binaries
   const child = spawn(cmd, rest, {
     stdio: 'inherit',
-    shell: true, // important for npm-installed binaries
+    shell: true, // important for npm-installed binaries on windows
   });
   child.on('exit', code => process.exit(code ?? 1));
 }
