@@ -281,7 +281,8 @@ describe('Loader hook (--import)', () => {
     const cleanup = await fsFromJson({
       [path.join(d, 'tsconfig.json')]: tsconfigMultiplePathsContent,
       [path.join(d, 'a.ts')]: tsconfigPathUtilsContent,
-      [path.join(d, 'src', 'utils', 'helpers.ts')]: tsconfigPathUtilsHelperContent,
+      [path.join(d, 'src', 'utils', 'helpers.ts')]:
+        tsconfigPathUtilsHelperContent,
     });
     const { code, stdout, stderr } = await executeProcess({
       command: process.execPath,
@@ -314,7 +315,8 @@ describe('Loader hook (--import)', () => {
     const cleanup = await fsFromJson({
       [path.join(d, 'tsconfig.json')]: tsconfigMultiplePathsContent,
       [path.join(d, 'a.ts')]: tsconfigPathComponentsContent,
-      [path.join(d, 'src', 'components', 'Button.ts')]: tsconfigPathButtonContent,
+      [path.join(d, 'src', 'components', 'Button.ts')]:
+        tsconfigPathButtonContent,
     });
     const { code, stdout, stderr } = await executeProcess({
       command: process.execPath,
@@ -400,7 +402,7 @@ describe('Loader hook (--import)', () => {
 
     expect(code).toBe(0);
     expect(removeColorCodes(stdout) + removeColorCodes(stderr)).toContain(
-      '[object Object]',
+      "{ app: 'config-loader' }",
     );
     expect(removeColorCodes(stdout) + removeColorCodes(stderr)).toContain(
       "args: [ '--tilde-arg=test' ]",

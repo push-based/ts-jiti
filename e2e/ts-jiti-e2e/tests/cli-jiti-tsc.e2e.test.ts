@@ -265,7 +265,8 @@ describe('CLI jiti', () => {
     const cleanup = await fsFromJson({
       [path.join(d, 'tsconfig.json')]: tsconfigMultiplePathsContent,
       [path.join(d, 'a.ts')]: tsconfigPathUtilsContent,
-      [path.join(d, 'src', 'utils', 'helpers.ts')]: tsconfigPathUtilsHelperContent,
+      [path.join(d, 'src', 'utils', 'helpers.ts')]:
+        tsconfigPathUtilsHelperContent,
     });
     const { code, stdout, stderr } = await executeProcess({
       command: 'npx',
@@ -297,7 +298,8 @@ describe('CLI jiti', () => {
     const cleanup = await fsFromJson({
       [path.join(d, 'tsconfig.json')]: tsconfigMultiplePathsContent,
       [path.join(d, 'a.ts')]: tsconfigPathComponentsContent,
-      [path.join(d, 'src', 'components', 'Button.ts')]: tsconfigPathButtonContent,
+      [path.join(d, 'src', 'components', 'Button.ts')]:
+        tsconfigPathButtonContent,
     });
     const { code, stdout, stderr } = await executeProcess({
       command: 'npx',
@@ -380,7 +382,7 @@ describe('CLI jiti', () => {
 
     expect(code).toBe(0);
     expect(removeColorCodes(stdout) + removeColorCodes(stderr)).toContain(
-      '[object Object]',
+      "{ app: 'config' }",
     );
     expect(removeColorCodes(stdout) + removeColorCodes(stderr)).toContain(
       "args: [ '--tilde-arg=test' ]",

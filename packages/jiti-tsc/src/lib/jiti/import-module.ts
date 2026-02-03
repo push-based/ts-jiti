@@ -1,12 +1,10 @@
 import { createJiti as createJitiSource } from 'jiti';
-import { stat } from 'node:fs/promises';
 import path from 'node:path';
-import { pathToFileURL } from 'node:url';
-import type { CompilerOptions } from 'typescript';
-import { loadTargetConfig } from './load-ts-config.js';
-import { settlePromise } from '../utils/promises.js';
 import * as process from 'node:process';
-import { JITI_TSCONFIG_PATH_ENV_VAR } from './constants';
+import type { CompilerOptions } from 'typescript';
+import { fileExists } from '../utils/file-system.js';
+import { JITI_TSCONFIG_PATH_ENV_VAR } from './constants.js';
+import { loadTargetConfig } from './load-ts-config.js';
 
 // For unknown reason, we can't import `JitiOptions` directly in this repository
 type JitiOptions = Exclude<Parameters<typeof createJitiSource>[1], undefined>;
@@ -28,19 +26,6 @@ export type ImportModuleOptions = JitiOptions & {
   tsconfig?: string;
 };
 
-export function toFileUrl(filepath: string): string {
-  // Handle Windows absolute paths (C:\Users\... or C:/Users/...) on all platforms
-  // pathToFileURL on non-Windows systems treats Windows paths as relative paths
-  const windowsAbsolutePathMatch = filepath.match(/^([A-Za-z]:)([\\/].*)$/);
-  if (windowsAbsolutePathMatch) {
-    const [, drive, rest] = windowsAbsolutePathMatch;
-    // Normalize backslashes to forward slashes and construct file URL manually
-    const normalizedPath = `${drive}${rest?.replace(/\\/g, '/')}`;
-    return `file:///${normalizedPath}`;
-  }
-  return pathToFileURL(filepath).href;
-}
-
 export async function importModule<T = unknown>(
   options: ImportModuleOptions,
 ): Promise<T> {
@@ -53,12 +38,8 @@ export async function importModule<T = unknown>(
   }
 
   const absoluteFilePath = path.resolve(process.cwd(), filepath);
-  const resolvedStats = await settlePromise(stat(absoluteFilePath));
-  if (resolvedStats.status === 'rejected') {
+  if (!(await fileExists(absoluteFilePath))) {
     throw new Error(`File '${absoluteFilePath}' does not exist`);
-  }
-  if (!resolvedStats.value.isFile()) {
-    throw new Error(`Expected '${filepath}' to be a file`);
   }
 
   const jitiInstance = await createTsJiti(import.meta.url, {
@@ -179,9 +160,12 @@ export async function createTsJiti(
   createJiti: (typeof import('jiti'))['createJiti'] = createJitiSource,
 ) {
   const { tsconfigPath, ...jitiOptions } = options;
-  const parsedTsconfigPath = process.env[JITI_TSCONFIG_PATH_ENV_VAR] ?? tsconfigPath;
+  const parsedTsconfigPath =
+    process.env[JITI_TSCONFIG_PATH_ENV_VAR] ?? tsconfigPath;
   const validPath: null | string =
-    parsedTsconfigPath == null ? null : path.resolve(process.cwd(), parsedTsconfigPath);
+    parsedTsconfigPath == null
+      ? null
+      : path.resolve(process.cwd(), parsedTsconfigPath);
   const tsDerivedJitiOptions: MappableJitiOptions = validPath
     ? await jitiOptionsFromTsConfig(validPath)
     : {};

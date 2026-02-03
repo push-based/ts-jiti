@@ -5,7 +5,7 @@ const [_, __, cmd, ...rest] = process.argv;
 
 if (!cmd) {
   console.error('Usage: jiti-tsc <file|command> [...args]');
-  // eslint-ignore-next-line n/no-process-exit
+  // eslint-disable-next-line n/no-process-exit
   process.exit(1);
 }
 
@@ -16,6 +16,6 @@ const child = spawn(
   { stdio: 'inherit' },
 );
 child.on('exit', code => {
-  // eslint-ignore-next-line n/no-process-exit
+  // eslint-disable-next-line n/no-process-exit
   process.exit(code ?? 1);
 });

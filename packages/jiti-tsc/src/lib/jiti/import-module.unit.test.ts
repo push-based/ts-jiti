@@ -1,11 +1,8 @@
-import path from 'node:path';
-import { pathToFileURL } from 'node:url';
 import type { CompilerOptions } from 'typescript';
 import { describe, expect, it } from 'vitest';
 import {
   mapTsPathsToJitiAlias,
   parseTsConfigToJitiConfig,
-  toFileUrl,
 } from './import-module.js';
 
 describe('mapTsPathsToJitiAlias', () => {
@@ -108,20 +105,5 @@ describe('parseTsConfigToJitiConfig', () => {
       sourceMaps: true,
       jsx: true,
     });
-  });
-});
-
-describe('toFileUrl', () => {
-  it('returns a file:// URL for an absolute path', () => {
-    const absolutePath = path.resolve('some', 'config.ts');
-    expect(toFileUrl(absolutePath)).toBe(pathToFileURL(absolutePath).href);
-  });
-
-  it('normalizes Windows absolute paths to file URLs for native import()', () => {
-    // Note: This is only needed for native import() calls, not for jiti.import()
-    // jiti handles Windows paths directly without URL conversion
-    // We should avoid native import calls in general
-    const windowsPath = path.win32.join('C:\\', 'Users', 'me', 'config.ts');
-    expect(toFileUrl(windowsPath)).toBe('file:///C:/Users/me/config.ts');
   });
 });
