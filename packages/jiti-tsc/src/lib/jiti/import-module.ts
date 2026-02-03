@@ -1,18 +1,44 @@
 import { createJiti as createJitiSource } from 'jiti';
 import { stat } from 'node:fs/promises';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import type { CompilerOptions } from 'typescript';
-import { fileExists } from '../utils/file-system.js';
-import { settlePromise } from '../utils/promises.js';
 import { loadTargetConfig } from './load-ts-config.js';
+import { settlePromise } from './promises.js';
 
 // For unknown reason, we can't import `JitiOptions` directly in this repository
 type JitiOptions = Exclude<Parameters<typeof createJitiSource>[1], undefined>;
+
+/**
+ * Known packages that must be loaded natively (not transformed by jiti).
+ * These packages rely on import.meta.url being a real file:// URL.
+ * When jiti transforms modules, import.meta.url becomes 'about:blank',
+ * causing errors in packages that use new URL(..., import.meta.url).
+ */
+export const JITI_NATIVE_MODULES = [
+  //'@vitest/eslint-plugin',
+  //'@code-pushup/eslint-config',
+  //'lighthouse',
+] as const;
 
 export type ImportModuleOptions = JitiOptions & {
   filepath: string;
   tsconfig?: string;
 };
+
+export function toFileUrl(filepath: string): string {
+  // Handle Windows absolute paths (C:\Users\... or C:/Users/...) on all platforms
+  // pathToFileURL on non-Windows systems treats Windows paths as relative paths
+  const windowsAbsolutePathMatch = filepath.match(/^([A-Za-z]:)([\\/].*)$/);
+  if (windowsAbsolutePathMatch) {
+    const [, drive, rest] = windowsAbsolutePathMatch;
+    // Normalize backslashes to forward slashes and construct file URL manually
+    const normalizedPath = `${drive}${rest?.replace(/\\/g, '/')}`;
+    return `file:///${normalizedPath}`;
+  }
+  return pathToFileURL(filepath).href;
+}
+
 export async function importModule<T = unknown>(
   options: ImportModuleOptions,
 ): Promise<T> {
@@ -38,7 +64,9 @@ export async function importModule<T = unknown>(
     tsconfigPath: tsconfig,
   });
 
-  return (await jitiInstance.import(absoluteFilePath, { default: true })) as T;
+  return (await jitiInstance.import(absoluteFilePath, {
+    default: true,
+  })) as T;
 }
 
 /**
@@ -91,6 +119,7 @@ export const mapTsJsxToJitiJsx = (tsJsxMode: number): boolean =>
  * | interopDefault    | boolean                 | esModuleInterop       | boolean                  | Enable default import interop. |
  * | sourceMaps        | boolean                 | sourceMap             | boolean                  | Enable sourcemap generation. |
  * | jsx               | boolean                 | jsx                   | JsxEmit (0-5)           | TS JsxEmit enum (0-5) => boolean JSX processing. |
+ * | nativeModules     | string[]                | -                     | -                        | Modules to load natively without jiti transformation. |
  */
 export type MappableJitiOptions = Partial<
   Pick<
@@ -148,21 +177,27 @@ export async function createTsJiti(
   createJiti: (typeof import('jiti'))['createJiti'] = createJitiSource,
 ) {
   const { tsconfigPath, ...jitiOptions } = options;
-
-  const fallbackTsconfigPath = path.resolve(process.cwd(), 'tsconfig.json');
-
   const validPath: null | string =
-    tsconfigPath == null
-      ? (await fileExists(fallbackTsconfigPath))
-        ? fallbackTsconfigPath
-        : null
-      : path.resolve(process.cwd(), tsconfigPath);
-
+    tsconfigPath != null ? path.resolve(process.cwd(), tsconfigPath) : null;
   const tsDerivedJitiOptions: MappableJitiOptions = validPath
     ? await jitiOptionsFromTsConfig(validPath)
     : {};
 
-  return createJiti(id, { ...jitiOptions, ...tsDerivedJitiOptions });
+  return createJiti(id, {
+    ...jitiOptions,
+    ...tsDerivedJitiOptions,
+    alias: {
+      ...jitiOptions.alias,
+      ...tsDerivedJitiOptions.alias,
+    },
+    nativeModules: [
+      ...new Set([
+        ...JITI_NATIVE_MODULES,
+        ...(jitiOptions.nativeModules ?? []),
+      ]),
+    ],
+    tryNative: true,
+  });
 }
 
 /**

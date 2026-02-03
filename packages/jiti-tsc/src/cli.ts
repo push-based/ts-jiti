@@ -21,7 +21,7 @@ const isFile =
 if (isFile) {
   const child = spawn(
     process.execPath,
-    ['--import', '@push-based/jiti-tsc', cmd, ...rest],
+    ['--import', '@push-based/jiti-tsc/register', cmd, ...rest],
     { stdio: 'inherit' },
   );
   child.on('exit', code => process.exit(code ?? 1));
