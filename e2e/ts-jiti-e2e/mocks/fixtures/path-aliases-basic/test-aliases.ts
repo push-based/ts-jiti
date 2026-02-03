@@ -1,7 +1,7 @@
 // Test file to verify path aliases work
-import { calculate } from './src/index';
-import { add } from '@utils/math';
 import { config } from '@/config';
+import { add } from '@utils/math';
+import { calculate } from './src/index';
 
 console.log('Testing path aliases...');
 console.log('Direct import result:', calculate());

@@ -27,6 +27,7 @@ graph TD
 ```
 
 **How it works:**
+
 1. **Parse**: Reads and parses `tsconfig.json` using TypeScript's config utilities
 2. **Map**: Converts TypeScript compiler options to jiti-compatible options:
    - `paths` → `alias` (with absolute path resolution)

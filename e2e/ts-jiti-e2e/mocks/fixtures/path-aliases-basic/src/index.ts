@@ -1,5 +1,5 @@
-import { add, multiply } from '@utils/math';
 import { config } from '@/config';
+import { add, multiply } from '@utils/math';
 
 export function calculate() {
   const sum = add(config.baseValue, 5);
