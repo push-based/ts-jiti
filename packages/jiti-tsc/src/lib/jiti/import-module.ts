@@ -4,7 +4,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import type { CompilerOptions } from 'typescript';
 import { loadTargetConfig } from './load-ts-config.js';
-import { settlePromise } from './promises.js';
+import { settlePromise } from '../utils/promises.js';
 
 // For unknown reason, we can't import `JitiOptions` directly in this repository
 type JitiOptions = Exclude<Parameters<typeof createJitiSource>[1], undefined>;
