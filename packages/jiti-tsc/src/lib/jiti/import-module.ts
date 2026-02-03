@@ -178,7 +178,7 @@ export async function createTsJiti(
 ) {
   const { tsconfigPath, ...jitiOptions } = options;
   const validPath: null | string =
-    tsconfigPath != null ? path.resolve(process.cwd(), tsconfigPath) : null;
+    tsconfigPath == null ? null : path.resolve(process.cwd(), tsconfigPath);
   const tsDerivedJitiOptions: MappableJitiOptions = validPath
     ? await jitiOptionsFromTsConfig(validPath)
     : {};
