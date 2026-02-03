@@ -5,6 +5,8 @@ import { pathToFileURL } from 'node:url';
 import type { CompilerOptions } from 'typescript';
 import { loadTargetConfig } from './load-ts-config.js';
 import { settlePromise } from '../utils/promises.js';
+import * as process from 'node:process';
+import { JITI_TSCONFIG_PATH_ENV_VAR } from './constants';
 
 // For unknown reason, we can't import `JitiOptions` directly in this repository
 type JitiOptions = Exclude<Parameters<typeof createJitiSource>[1], undefined>;
@@ -169,7 +171,7 @@ export function parseTsConfigToJitiConfig(
  * Used instead of direct jiti.createJiti to allow tsconfig integration.
  * @param id
  * @param options
- * @param jiti
+ * @param createJiti
  */
 export async function createTsJiti(
   id: string,
@@ -177,8 +179,9 @@ export async function createTsJiti(
   createJiti: (typeof import('jiti'))['createJiti'] = createJitiSource,
 ) {
   const { tsconfigPath, ...jitiOptions } = options;
+  const parsedTsconfigPath = process.env[JITI_TSCONFIG_PATH_ENV_VAR] ?? tsconfigPath;
   const validPath: null | string =
-    tsconfigPath == null ? null : path.resolve(process.cwd(), tsconfigPath);
+    parsedTsconfigPath == null ? null : path.resolve(process.cwd(), parsedTsconfigPath);
   const tsDerivedJitiOptions: MappableJitiOptions = validPath
     ? await jitiOptionsFromTsConfig(validPath)
     : {};

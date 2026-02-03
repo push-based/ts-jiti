@@ -55,6 +55,39 @@ const tsconfigPathContent = {
   compilerOptions: { baseUrl: '.', paths: { '@/*': ['./*'] } },
 };
 
+const tsconfigMultiplePathsContent = {
+  compilerOptions: {
+    baseUrl: '.',
+    paths: {
+      '@/*': ['./*'],
+      '@components/*': ['./src/components/*'],
+      '@utils/*': ['./src/utils/*'],
+      '@lib': ['./src/lib/index.ts'],
+      '~/*': ['./src/*'],
+    },
+  },
+};
+
+const tsconfigPathUtilsContent = `import { helper } from '@utils/helpers'; console.log(helper);
+console.log('args:', process.argv.slice(2));`;
+
+const tsconfigPathUtilsHelperContent = `export const helper = 'utils-helper';`;
+
+const tsconfigPathComponentsContent = `import { Button } from '@components/Button'; console.log(Button);
+console.log('args:', process.argv.slice(2));`;
+
+const tsconfigPathButtonContent = `export const Button = 'Button-component';`;
+
+const tsconfigPathLibContent = `import lib from '@lib'; console.log(lib);
+console.log('args:', process.argv.slice(2));`;
+
+const tsconfigPathLibIndexContent = `export default 'lib-index';`;
+
+const tsconfigPathTildeContent = `import { config } from '~/config/app'; console.log(config);
+console.log('args:', process.argv.slice(2));`;
+
+const tsconfigPathAppConfigContent = `export const config = { app: 'config' };`;
+
 describe('CLI jiti', () => {
   const envRoot = path.join(E2E_ENVIRONMENTS_DIR, nxTargetProject());
   const describeName = 'CLI jiti';
@@ -223,6 +256,134 @@ describe('CLI jiti', () => {
     expect(code).toBe(0);
     expect(removeColorCodes(stdout) + removeColorCodes(stderr)).toContain(
       "args: [ '--complex-arg=multi-file' ]",
+    );
+    await cleanup();
+  });
+
+  it('should exec .ts with multiple path aliases (@utils)', async () => {
+    const d = getTestDir('exec-ts-multiple-paths-utils');
+    const cleanup = await fsFromJson({
+      [path.join(d, 'tsconfig.json')]: tsconfigMultiplePathsContent,
+      [path.join(d, 'a.ts')]: tsconfigPathUtilsContent,
+      [path.join(d, 'src', 'utils', 'helpers.ts')]: tsconfigPathUtilsHelperContent,
+    });
+    const { code, stdout, stderr } = await executeProcess({
+      command: 'npx',
+      args: [
+        '@push-based/jiti-tsc',
+        path.relative(envRoot, path.join(d, 'a.ts')),
+        '--utils-arg=test',
+      ],
+      cwd: envRoot,
+      env: {
+        ...process.env,
+        JITI_TSCONFIG_PATH: path.resolve(path.join(d, 'tsconfig.json')),
+      },
+      silent: true,
+    });
+
+    expect(code).toBe(0);
+    expect(removeColorCodes(stdout) + removeColorCodes(stderr)).toContain(
+      'utils-helper',
+    );
+    expect(removeColorCodes(stdout) + removeColorCodes(stderr)).toContain(
+      "args: [ '--utils-arg=test' ]",
+    );
+    await cleanup();
+  });
+
+  it('should exec .ts with multiple path aliases (@components)', async () => {
+    const d = getTestDir('exec-ts-multiple-paths-components');
+    const cleanup = await fsFromJson({
+      [path.join(d, 'tsconfig.json')]: tsconfigMultiplePathsContent,
+      [path.join(d, 'a.ts')]: tsconfigPathComponentsContent,
+      [path.join(d, 'src', 'components', 'Button.ts')]: tsconfigPathButtonContent,
+    });
+    const { code, stdout, stderr } = await executeProcess({
+      command: 'npx',
+      args: [
+        '@push-based/jiti-tsc',
+        path.relative(envRoot, path.join(d, 'a.ts')),
+        '--components-arg=test',
+      ],
+      cwd: envRoot,
+      env: {
+        ...process.env,
+        JITI_TSCONFIG_PATH: path.resolve(path.join(d, 'tsconfig.json')),
+      },
+      silent: true,
+    });
+
+    expect(code).toBe(0);
+    expect(removeColorCodes(stdout) + removeColorCodes(stderr)).toContain(
+      'Button-component',
+    );
+    expect(removeColorCodes(stdout) + removeColorCodes(stderr)).toContain(
+      "args: [ '--components-arg=test' ]",
+    );
+    await cleanup();
+  });
+
+  it('should exec .ts with multiple path aliases (@lib exact match)', async () => {
+    const d = getTestDir('exec-ts-multiple-paths-lib');
+    const cleanup = await fsFromJson({
+      [path.join(d, 'tsconfig.json')]: tsconfigMultiplePathsContent,
+      [path.join(d, 'a.ts')]: tsconfigPathLibContent,
+      [path.join(d, 'src', 'lib', 'index.ts')]: tsconfigPathLibIndexContent,
+    });
+    const { code, stdout, stderr } = await executeProcess({
+      command: 'npx',
+      args: [
+        '@push-based/jiti-tsc',
+        path.relative(envRoot, path.join(d, 'a.ts')),
+        '--lib-arg=test',
+      ],
+      cwd: envRoot,
+      env: {
+        ...process.env,
+        JITI_TSCONFIG_PATH: path.resolve(path.join(d, 'tsconfig.json')),
+      },
+      silent: true,
+    });
+
+    expect(code).toBe(0);
+    expect(removeColorCodes(stdout) + removeColorCodes(stderr)).toContain(
+      'lib-index',
+    );
+    expect(removeColorCodes(stdout) + removeColorCodes(stderr)).toContain(
+      "args: [ '--lib-arg=test' ]",
+    );
+    await cleanup();
+  });
+
+  it('should exec .ts with multiple path aliases (~ alias)', async () => {
+    const d = getTestDir('exec-ts-multiple-paths-tilde');
+    const cleanup = await fsFromJson({
+      [path.join(d, 'tsconfig.json')]: tsconfigMultiplePathsContent,
+      [path.join(d, 'a.ts')]: tsconfigPathTildeContent,
+      [path.join(d, 'src', 'config', 'app.ts')]: tsconfigPathAppConfigContent,
+    });
+    const { code, stdout, stderr } = await executeProcess({
+      command: 'npx',
+      args: [
+        '@push-based/jiti-tsc',
+        path.relative(envRoot, path.join(d, 'a.ts')),
+        '--tilde-arg=test',
+      ],
+      cwd: envRoot,
+      env: {
+        ...process.env,
+        JITI_TSCONFIG_PATH: path.resolve(path.join(d, 'tsconfig.json')),
+      },
+      silent: true,
+    });
+
+    expect(code).toBe(0);
+    expect(removeColorCodes(stdout) + removeColorCodes(stderr)).toContain(
+      '[object Object]',
+    );
+    expect(removeColorCodes(stdout) + removeColorCodes(stderr)).toContain(
+      "args: [ '--tilde-arg=test' ]",
     );
     await cleanup();
   });
