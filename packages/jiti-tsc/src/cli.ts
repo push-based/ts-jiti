@@ -1,22 +1,21 @@
 #!/usr/bin/env node
 import { spawn } from 'node:child_process';
 
-const [_nodePath, _scriptPath, file, ...rest] = process.argv;
+const [_, __, cmd, ...rest] = process.argv;
 
-if (!file) {
-  console.error('Usage: jiti-tsc <file>');
+if (!cmd) {
+  console.error('Usage: jiti-tsc <file|command> [...args]');
   // eslint-disable-next-line n/no-process-exit
   process.exit(1);
 }
 
-const child = spawn(process.execPath, [file, ...rest], {
-  stdio: 'inherit',
-  env: {
-    ...process.env,
-    NODE_OPTIONS: [process.env['NODE_OPTIONS'], '--import @push-based/jiti-tsc']
-      .filter(Boolean)
-      .join(' '),
-  },
+// Always use the register entry point for consistent loader hook behavior
+const child = spawn(
+  process.execPath,
+  ['--import', '@push-based/jiti-tsc/register', cmd, ...rest],
+  { stdio: 'inherit' },
+);
+child.on('exit', code => {
+  // eslint-disable-next-line n/no-process-exit
+  process.exit(code ?? 1);
 });
-// eslint-disable-next-line n/no-process-exit
-child.on('exit', code => process.exit(code ?? 1));

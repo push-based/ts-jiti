@@ -4,14 +4,45 @@
 
 ## Features
 
-This library does one simple thing: it converts TypeScript path aliases to jiti-compatible alias options and wrapd the original jiti API to make it easier to use in monorepo environments.
+This library does one simple thing: it converts TypeScript path aliases to jiti-compatible alias options and wraps the original jiti API to make it easier to use in monorepo environments.
+
+## Architecture Overview
+
+```mermaid
+graph TD
+    A[tsconfig.json] --> B[TypeScript Config Parser]
+    B --> C[TS Options → Jiti Options]
+    C --> D[Enhanced Jiti Instance]
+
+    E[Original Jiti] --> F[createTsJiti Wrapper]
+    F --> D
+
+    D --> G[CLI Tool]
+    D --> H[Loader Hook]
+    D --> I[Programmatic API]
+
+    G --> J[npx jiti-tsc file.ts]
+    H --> K[--import jiti-tsc/register]
+    I --> L[importModule/createTsJiti]
+```
+
+**How it works:**
+
+1. **Parse**: Reads and parses `tsconfig.json` using TypeScript's config utilities
+2. **Map**: Converts TypeScript compiler options to jiti-compatible options:
+   - `paths` → `alias` (with absolute path resolution)
+   - `esModuleInterop` → `interopDefault`
+   - `sourceMap` → `sourceMaps`
+   - `jsx` → `jsx` (boolean)
+3. **Wrap**: Creates jiti instance with merged options (TS-derived + user-provided)
+4. **Enhance**: Adds environment variable configuration for global registration
 
 **✅ Full TypeScript configuration support:**
 
-- ✅ FAutomatically detected from the `tsconfig.json` file in the current working directory
-- ✅ FAccepts custom tsconfig path via the `JITI_TSCONFIG_PATH`
-- ✅ FCLI tool supporting tsconfig options
-- ✅ FProgrammatic API supporting tsconfig options
+- ✅ Automatically detected from the `tsconfig.json` file in the current working directory
+- ✅ Accepts custom tsconfig path via the `JITI_TSCONFIG_PATH`
+- ✅ CLI tool supporting tsconfig options
+- ✅ Programmatic API supporting tsconfig options
 
 ## Installation
 

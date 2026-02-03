@@ -1,31 +1,23 @@
-// src/core/register.ts
-import path from 'node:path';
 import { JITI_TSCONFIG_PATH_ENV_VAR } from './constants.js';
-import { jitiOptionsFromTsConfig } from './import-module.js';
-import { jitiOptionsToEnv } from './jiti.schema.js';
+import { setJitiEnvVars } from './env-vars.js';
+import { parseTsConfigToJitiConfig } from './import-module.js';
+import { loadTargetConfig } from './load-ts-config.js';
 
 export async function registerJitiTsconfig() {
-  const tsconfigPathEnv = process.env[JITI_TSCONFIG_PATH_ENV_VAR];
-  const tsconfigPath = tsconfigPathEnv
-    ? path.isAbsolute(tsconfigPathEnv)
-      ? tsconfigPathEnv
-      : path.resolve(process.cwd(), tsconfigPathEnv)
-    : path.resolve(process.cwd(), 'tsconfig.json');
+  const tsconfigPath = process.env[JITI_TSCONFIG_PATH_ENV_VAR];
 
-  try {
-    const jitiOptions = await jitiOptionsFromTsConfig(tsconfigPath);
-    const envVars = jitiOptionsToEnv(jitiOptions);
-
-    Object.entries(envVars).forEach(
-      // eslint-disable-next-line functional/immutable-data
-      ([k, v]) => v != null && (process.env[k] = v),
-    );
-  } catch {
-    console.warn(
-      `[jiti-tsc] Failed to load tsconfig from ${tsconfigPath}, continuing without tsconfig`,
-    );
+  if (tsconfigPath) {
+    try {
+      const { options } = loadTargetConfig(tsconfigPath);
+      const jitiConfig = parseTsConfigToJitiConfig(options, tsconfigPath);
+      setJitiEnvVars(jitiConfig);
+    } catch (error) {
+      console.warn('[jiti-tsc] Failed to load TypeScript config:', error);
+    }
   }
 
+  // Always import jiti/register for basic TypeScript support
+  // It will use the environment variables we set above
   // @ts-expect-error - jiti/register is a side-effect import
   await import('jiti/register');
 }

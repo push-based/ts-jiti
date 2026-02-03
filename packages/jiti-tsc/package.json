@@ -10,8 +10,12 @@
       "import": "./src/index.js",
       "types": "./src/index.d.ts"
     },
+    "./register": {
+      "import": "./src/loader.js",
+      "types": "./src/index.d.ts"
+    },
     "./jiti-tsc": {
-      "import": "./src/index.js",
+      "import": "./src/loader.js",
       "types": "./src/index.d.ts"
     }
   },
